@@ -16,7 +16,7 @@
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-logo">
-                <div class="brand-logo">D</div>
+                <img class="brand-logo" src="{{ asset('doralogo.png') }}" alt="DORA logo">
                 <h1 class="auth-title">Welcome Back</h1>
                 <p class="auth-sub">Sign in to continue your journey</p>
             </div>

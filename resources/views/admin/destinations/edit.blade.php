@@ -3,20 +3,20 @@
 @section('title', 'Edit Destination')
 
 @section('content')
-<div class="page-header">
+<div class="page-header" style="background:linear-gradient(160deg,var(--deep-earth) 0%,var(--forest-green) 100%);color:white;">
     <div class="container">
-        <a href="{{ route('admin.destinations.index') }}" style="display:inline-flex;align-items:center;gap:.4rem;color:var(--text-muted);text-decoration:none;font-size:.9rem;margin-bottom:.75rem;">
+        <a href="{{ route('admin.destinations.index') }}" style="display:inline-flex;align-items:center;gap:.4rem;color:rgba(255,255,255,0.8);text-decoration:none;font-size:.9rem;margin-bottom:.75rem;">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
             Back to Destinations
         </a>
-        <h1 class="page-title">Edit Destination</h1>
-        <p class="page-subtitle">Updating: <strong>{{ $destination->name }}</strong></p>
+        <h1 class="page-title" style="color:white;">Edit Destination</h1>
+        <p class="page-subtitle" style="color:rgba(255,255,255,0.9);">Updating: <strong>{{ $destination->name }}</strong></p>
     </div>
 </div>
 
 <div class="container" style="padding-bottom:4rem;max-width:860px;">
     <div style="background:white;border-radius:16px;box-shadow:var(--shadow-md);padding:2.5rem;">
-        <form method="POST" action="{{ route('admin.destinations.update', $destination) }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('admin.destinations.update', $destination) }}" enctype="multipart/form-data" data-confirm="Save changes to this destination?" data-confirm-title="Update Destination" data-confirm-text="Save">
             @csrf @method('PUT')
 
             <div style="display:grid;gap:1.5rem;">

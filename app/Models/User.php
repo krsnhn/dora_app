@@ -39,8 +39,10 @@ class User extends Authenticatable
     public function favorites() { return $this->hasMany(Favorite::class); }
     public function favoriteDestinations() { return $this->belongsToMany(Destination::class, 'favorites'); }
     public function memories() { return $this->hasMany(Memory::class); }
+    public function memoryAlbums() { return $this->hasMany(MemoryAlbum::class); }
     public function feedback() { return $this->hasMany(Feedback::class); }
     public function backpackItems() { return $this->hasMany(BackpackItem::class); }
+    public function backpackGroups() { return $this->hasMany(BackpackGroup::class); }
     public function destinationRequests() { return $this->hasMany(DestinationRequest::class, 'agency_id'); }
     public function agencyFeedback() { return $this->hasMany(Feedback::class, 'agency_id'); }
 }

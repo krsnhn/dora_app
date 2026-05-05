@@ -20,7 +20,7 @@ class Destination extends Model {
     use HasFactory;
 
     protected $fillable = [
-        'name', 'country', 'location', 'description', 'image_path',
+        'name', 'country', 'location', 'description', 'image_path', 'image_url',
         'tags', 'latitude', 'longitude', 'weather_location', 'is_approved', 'created_by',
     ];
 

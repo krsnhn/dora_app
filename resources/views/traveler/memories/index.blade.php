@@ -13,7 +13,7 @@
     }
     
     .memories-header {
-        background: linear-gradient(135deg, var(--deep-earth) 0%, var(--forest-green) 100%);
+        background: linear-gradient(160deg, var(--deep-earth) 0%, var(--forest-green) 100%);
         padding: 3rem 0;
         margin-bottom: 2rem;
         color: white;
@@ -24,11 +24,13 @@
         font-size: 2.5rem;
         font-weight: 600;
         margin-bottom: 0.5rem;
+        color: white;
     }
     
     .page-subtitle {
         font-size: 1rem;
         opacity: 0.9;
+        color: rgba(255,255,255,0.9);
     }
     
     /* Form Elements */
@@ -135,6 +137,127 @@
         font-size: 0.875rem;
         flex-wrap: wrap;
         gap: 0.5rem;
+    }
+
+    .albums-section {
+        margin-bottom: 2rem;
+    }
+
+    .albums-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .albums-title {
+        font-family: Inter, system-ui, sans-serif;
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--text-dark);
+    }
+
+    .albums-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 1rem;
+    }
+
+    .album-card {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .album-cover {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--platinum-beige);
+        box-shadow: var(--shadow-sm);
+        border: 2px solid transparent;
+    }
+
+    .album-card.active .album-cover {
+        border-color: var(--forest-green);
+    }
+
+    .album-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .album-empty-cover {
+        height: 100%;
+        display: grid;
+        place-items: center;
+        color: var(--deep-earth);
+        opacity: .65;
+    }
+
+    .album-count {
+        position: absolute;
+        right: .55rem;
+        bottom: .55rem;
+        padding: .2rem .5rem;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, .58);
+        color: white;
+        font-size: .72rem;
+        font-weight: 800;
+    }
+
+    .album-name {
+        margin-top: .55rem;
+        font-size: .9rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .album-sub {
+        font-size: .78rem;
+        color: var(--text-muted);
+    }
+
+    .album-info-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: .5rem;
+    }
+
+    .album-rename-btn {
+        border: 0;
+        background: transparent;
+        color: var(--text-muted);
+        font-size: .74rem;
+        font-weight: 800;
+        cursor: pointer;
+        padding: .55rem .1rem 0;
+    }
+
+    .album-rename-btn:hover {
+        color: var(--forest-green);
+    }
+
+    .album-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: .25rem;
+        padding: .18rem .45rem;
+        border-radius: 999px;
+        background: var(--platinum-beige);
+        color: var(--deep-earth);
+        font-size: .7rem;
+        font-weight: 800;
+        margin-bottom: .55rem;
     }
     
     /* Memories Grid */
@@ -413,6 +536,10 @@
         .btn-group .btn {
             flex: 1;
         }
+
+        .albums-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
         
         .form-row {
             grid-template-columns: 1fr;
@@ -473,7 +600,19 @@
                            value="{{ request('search') }}">
                 </div>
             </div>
-            
+             
+            <div class="filter-group small">
+                <label>Album</label>
+                <select name="album" class="form-control" onchange="this.form.submit()">
+                    <option value="">All Albums</option>
+                    @foreach($albums as $album)
+                        <option value="{{ $album->id }}" {{ request('album') == $album->id ? 'selected' : '' }}>
+                            {{ $album->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
             <div class="filter-group small">
                 <label>📅 Year</label>
                 <select name="year" class="form-control" onchange="this.form.submit()">
@@ -488,13 +627,47 @@
             
             <div class="btn-group">
                 <button type="submit" class="btn btn-primary">Apply Filters</button>
-                @if(request()->hasAny(['search', 'year']))
+                @if(request()->hasAny(['search', 'year', 'album']))
                     <a href="{{ route('memories.index') }}" class="btn btn-secondary">Clear All</a>
                 @endif
             </div>
         </form>
     </div>
-    
+
+    <div class="albums-section">
+        <div class="albums-header">
+            <h2 class="albums-title">Albums</h2>
+            @if($selectedAlbum)
+                <a href="{{ route('memories.index', request()->except('album', 'page')) }}" class="btn btn-outline btn-sm">View All Photos</a>
+            @endif
+        </div>
+        <div class="albums-grid">
+            @foreach($albums as $album)
+                <a href="{{ route('memories.index', array_merge(request()->except('page'), ['album' => $album->id])) }}" class="album-card {{ $selectedAlbum?->id === $album->id ? 'active' : '' }}">
+                    <div class="album-cover">
+                        @if($album->coverMemory?->image_path)
+                            <img src="{{ $album->coverMemory->image_path }}" alt="{{ $album->name }}" loading="lazy">
+                        @else
+                            <div class="album-empty-cover">
+                                <svg width="42" height="42" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                                    <path d="M4 5h16v14H4zM8 13l2-2 3 3 2-2 3 4"/>
+                                </svg>
+                            </div>
+                        @endif
+                        <span class="album-count">{{ $album->memories_count }}</span>
+                    </div>
+                    <div class="album-info-row">
+                        <div style="min-width:0;">
+                            <div class="album-name">{{ $album->name }}</div>
+                            <div class="album-sub">{{ $album->memories_count }} {{ Str::plural('photo', $album->memories_count) }}</div>
+                        </div>
+                        <button type="button" class="album-rename-btn" onclick="event.preventDefault(); event.stopPropagation(); openRenameAlbumModal({{ $album->id }}, '{{ addslashes($album->name) }}')">Rename</button>
+                    </div>
+                </a>
+            @endforeach
+        </div>
+    </div>
+     
     <!-- Results Meta -->
     @if($memories->count())
     <div class="results-meta">
@@ -526,6 +699,9 @@
                      onclick="openLightbox('{{ $memory->image_path }}', '{{ addslashes($memory->caption) }}')">
             @endif
             <div class="memory-content">
+                @if($memory->album)
+                    <div class="album-pill">{{ $memory->album->name }}</div>
+                @endif
                 @if($memory->caption)
                     <p class="memory-caption">{{ $memory->caption }}</p>
                 @endif
@@ -543,7 +719,7 @@
                             · {{ \Carbon\Carbon::parse($memory->travel_date)->format('M Y') }}
                         @endif
                     </div>
-                    <form method="POST" action="{{ route('memories.destroy', $memory) }}" onsubmit="return confirm('Delete this memory?')" style="margin:0;">
+                    <form method="POST" action="{{ route('memories.destroy', $memory) }}" data-confirm="Delete this memory?" data-confirm-title="Delete Memory" data-confirm-text="Delete" data-confirm-danger="true" style="margin:0;">
                         @csrf 
                         @method('DELETE')
                         <button type="submit" class="delete-memory-btn" title="Delete memory">
@@ -573,14 +749,14 @@
             </svg>
         </div>
         <h2 class="empty-title">
-            @if(request()->hasAny(['search', 'year']))
+            @if(request()->hasAny(['search', 'year', 'album']))
                 No memories found
             @else
                 No memories yet
             @endif
         </h2>
         <p class="empty-text">
-            @if(request()->hasAny(['search', 'year']))
+            @if(request()->hasAny(['search', 'year', 'album']))
                 Try adjusting your search or clearing the filters
             @else
                 Start uploading photos from your travels to create a beautiful personal album.
@@ -593,6 +769,35 @@
         @endif
     </div>
     @endif
+</div>
+
+{{-- Rename Album Modal --}}
+<div id="renameAlbumModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3 class="modal-title">Rename Album</h3>
+            <button type="button" onclick="closeRenameAlbumModal()" class="modal-close">&times;</button>
+        </div>
+
+        <form method="POST" id="renameAlbumForm" data-confirm="Rename this album?" data-confirm-title="Rename Album" data-confirm-text="Rename">
+            @csrf
+            @method('PATCH')
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Album Name</label>
+                    <input type="text" name="name" id="renameAlbumInput" class="form-input" maxlength="80" required>
+                    @error('name')
+                        <span class="form-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center;">Rename</button>
+                    <button type="button" onclick="closeRenameAlbumModal()" class="btn btn-secondary" style="flex:1;justify-content:center;">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 {{-- Upload Modal --}}
@@ -614,14 +819,17 @@
                                 <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
                         </div>
-                        <p class="dropzone-title">Click to upload</p>
-                        <p class="dropzone-hint">JPG, PNG up to 10MB</p>
-                        <input type="file" name="image" id="memoryInput" accept="image/*" required style="display:none;">
+                        <p class="dropzone-title">Click to upload photos</p>
+                        <p class="dropzone-hint">JPG, PNG, WEBP up to 5MB each</p>
+                        <input type="file" name="images[]" id="memoryInput" accept="image/*" multiple required style="display:none;">
                     </div>
                     <div id="memoryPreview" class="image-preview">
                         <img id="memoryPreviewImg" alt="Preview">
                     </div>
-                    @error('image')
+                    @error('images')
+                        <span class="form-error">{{ $message }}</span>
+                    @enderror
+                    @error('images.*')
                         <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
@@ -632,6 +840,30 @@
                     @error('caption')
                         <span class="form-error">{{ $message }}</span>
                     @enderror
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Album</label>
+                        <select name="album_id" class="form-control" id="albumSelect">
+                            @foreach($albums as $album)
+                                <option value="{{ $album->id }}" {{ old('album_id', request('album')) == $album->id ? 'selected' : '' }}>
+                                    {{ $album->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('album_id')
+                            <span class="form-error">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">New Album</label>
+                        <input type="text" name="album_name" class="form-input" placeholder="Beach trip, Family, Japan..." value="{{ old('album_name') }}">
+                        @error('album_name')
+                            <span class="form-error">{{ $message }}</span>
+                        @enderror
+                    </div>
                 </div>
 
                 <div class="form-row">
@@ -690,10 +922,28 @@ function closeUploadModal() {
     resetUploadForm();
 }
 
+function openRenameAlbumModal(albumId, albumName) {
+    const modal = document.getElementById('renameAlbumModal');
+    const form = document.getElementById('renameAlbumForm');
+    const input = document.getElementById('renameAlbumInput');
+
+    form.action = `/memories/albums/${albumId}`;
+    input.value = albumName;
+    modal.style.display = 'flex';
+    input.focus();
+    input.select();
+}
+
+function closeRenameAlbumModal() {
+    document.getElementById('renameAlbumModal').style.display = 'none';
+}
+
 function resetUploadForm() {
     document.getElementById('memoryInput').value = '';
     document.getElementById('memoryPreview').style.display = 'none';
     document.getElementById('memoryDropzone').style.display = 'block';
+    const title = document.querySelector('#memoryDropzone .dropzone-title');
+    if (title) title.textContent = 'Click to upload photos';
 }
 
 // Dropzone functionality
@@ -701,6 +951,7 @@ const memoryDropzone = document.getElementById('memoryDropzone');
 const memoryInput = document.getElementById('memoryInput');
 const memoryPreview = document.getElementById('memoryPreview');
 const memoryPreviewImg = document.getElementById('memoryPreviewImg');
+const memoryDropzoneTitle = memoryDropzone?.querySelector('.dropzone-title');
 
 if (memoryDropzone) {
     memoryDropzone.addEventListener('click', () => memoryInput.click());
@@ -714,6 +965,9 @@ if (memoryInput) {
                 memoryPreviewImg.src = e.target.result;
                 memoryPreview.style.display = 'block';
                 memoryDropzone.style.display = 'none';
+                if (memoryDropzoneTitle) {
+                    memoryDropzoneTitle.textContent = `${memoryInput.files.length} ${memoryInput.files.length === 1 ? 'photo' : 'photos'} selected`;
+                }
             };
             reader.readAsDataURL(memoryInput.files[0]);
         }
@@ -723,6 +977,9 @@ if (memoryInput) {
 // Close modal when clicking outside
 document.getElementById('uploadModal').addEventListener('click', function(e) {
     if (e.target === this) closeUploadModal();
+});
+document.getElementById('renameAlbumModal').addEventListener('click', function(e) {
+    if (e.target === this) closeRenameAlbumModal();
 });
 
 // Lightbox functions
@@ -746,6 +1003,7 @@ function closeLightbox() {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeUploadModal();
+        closeRenameAlbumModal();
         closeLightbox();
     }
 });

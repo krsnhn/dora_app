@@ -13,7 +13,7 @@
     }
     
     .page-header {
-        background: linear-gradient(135deg, var(--deep-earth) 0%, var(--forest-green) 100%);
+        background: linear-gradient(160deg, var(--deep-earth) 0%, var(--forest-green) 100%);
         padding: 3rem 0;
         margin-bottom: 2rem;
         color: white;
@@ -24,11 +24,13 @@
         font-size: 2.5rem;
         font-weight: 600;
         margin-bottom: 0.5rem;
+        color: white;
     }
     
     .page-subtitle {
         font-size: 1rem;
         opacity: 0.9;
+        color: rgba(255,255,255,0.9);
     }
     
     .filter-container {
@@ -402,11 +404,7 @@
                 @if($dest->image_url)
                     <img src="{{ $dest->image_url }}" alt="{{ $dest->name }}" loading="lazy">
                 @else
-                    <div class="card-img-placeholder">
-                        <svg width="56" height="56" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.5" viewBox="0 0 24 24">
-                            <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                    </div>
+                    <div class="card-img-placeholder">No Photo Available</div>
                 @endif
                 
                 <div class="dest-country-badge">{{ $dest->country }}</div>
@@ -480,15 +478,22 @@
 </div>
 
 <script>
-function removeFavorite(destId, btn) {
-    if (!confirm('Remove this destination from your favorites?')) {
+async function removeFavorite(destId, btn) {
+    const confirmed = await window.doraConfirm({
+        title: 'Remove Favorite',
+        message: 'Remove this destination from your favorites?',
+        confirmText: 'Remove',
+        danger: true
+    });
+
+    if (!confirmed) {
         return;
     }
     
     const card = btn.closest('.favorite-card');
     
-    fetch(`/favorites/${destId}`, {
-        method: 'DELETE',
+    fetch(`/favorites/${destId}/toggle`, {
+        method: 'POST',
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
             'Content-Type': 'application/json',
@@ -514,7 +519,7 @@ function removeFavorite(destId, btn) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Failed to remove favorite. Please try again.');
+        window.doraAlert('Failed to remove favorite. Please try again.', 'Favorite Not Updated');
     });
 }
 </script>

@@ -11,11 +11,10 @@ class InquiryController extends Controller
 {
     protected EmailService $emailService;
 
-    /*public function __construct(EmailService $emailService)
+    public function __construct(EmailService $emailService)
     {
-        $this->middleware('auth')->only(['index', 'store']);
         $this->emailService = $emailService;
-    }*/
+    }
 
     public function index()
     {

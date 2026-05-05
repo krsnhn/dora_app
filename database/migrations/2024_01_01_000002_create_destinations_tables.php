@@ -56,9 +56,11 @@ return new class extends Migration
             $table->string('location');
             $table->text('description');
             $table->string('image_path')->nullable();
+            $table->string('image_url')->nullable();
             $table->string('tags')->nullable();
             $table->decimal('latitude', 10, 7)->nullable();
             $table->decimal('longitude', 10, 7)->nullable();
+            $table->string('weather_location')->nullable();
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->text('admin_notes')->nullable();
             $table->foreign('agency_id')->references('id')->on('users')->onDelete('cascade');

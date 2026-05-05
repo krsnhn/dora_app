@@ -28,33 +28,45 @@ body { margin:0; padding:0; background:#f5f0e8; font-family:'Helvetica Neue',Ari
 <div class="container">
     <div class="card">
         <div class="header">
-            <h1>🌍 DORA</h1>
+            <h1>DORA</h1>
             <p>Digital Tourism Connector</p>
         </div>
         <div class="body">
             <p style="color:#2C1810;font-weight:600;font-size:1.05rem;margin-bottom:.5rem;">You have a new inquiry!</p>
-            <p style="color:#888;font-size:.9rem;margin-bottom:1.5rem;">A traveler is interested in your package: <strong style="color:#2C1810;">{{ $inquiry->tourPackage->name }}</strong></p>
+            <p style="color:#888;font-size:.9rem;margin-bottom:1.5rem;">A traveler is interested in your package: <strong style="color:#2C1810;">{{ $package->name }}</strong></p>
 
             <div>
                 <div class="detail-row">
                     <span class="detail-label">From</span>
-                    <span class="detail-value">{{ $inquiry->name }}</span>
+                    <span class="detail-value">{{ $inquiry->contact_name }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Email</span>
-                    <span class="detail-value"><a href="mailto:{{ $inquiry->email }}" style="color:#1E4A6D;">{{ $inquiry->email }}</a></span>
+                    <span class="detail-value"><a href="mailto:{{ $inquiry->contact_email }}" style="color:#1E4A6D;">{{ $inquiry->contact_email }}</a></span>
                 </div>
+                @if($inquiry->contact_phone)
+                <div class="detail-row">
+                    <span class="detail-label">Phone</span>
+                    <span class="detail-value">{{ $inquiry->contact_phone }}</span>
+                </div>
+                @endif
                 <div class="detail-row">
                     <span class="detail-label">Group Size</span>
                     <span class="detail-value">{{ $inquiry->pax }} {{ $inquiry->pax == 1 ? 'person' : 'people' }}</span>
                 </div>
+                @if($inquiry->travel_date)
+                <div class="detail-row">
+                    <span class="detail-label">Travel Date</span>
+                    <span class="detail-value">{{ $inquiry->travel_date->format('M d, Y') }}</span>
+                </div>
+                @endif
                 <div class="detail-row">
                     <span class="detail-label">Package</span>
-                    <span class="detail-value">{{ $inquiry->tourPackage->name }} <span class="badge">₱{{ number_format($inquiry->tourPackage->price,2) }}</span></span>
+                    <span class="detail-value">{{ $package->name }} <span class="badge">PHP {{ number_format($package->price, 2) }}</span></span>
                 </div>
                 <div class="detail-row" style="border:none;">
                     <span class="detail-label">Destination</span>
-                    <span class="detail-value">{{ $inquiry->tourPackage->destination->name ?? '—' }}, {{ $inquiry->tourPackage->destination->country ?? '' }}</span>
+                    <span class="detail-value">{{ $package->destination->name ?? '-' }}, {{ $package->destination->country ?? '' }}</span>
                 </div>
             </div>
 
@@ -66,13 +78,13 @@ body { margin:0; padding:0; background:#f5f0e8; font-family:'Helvetica Neue',Ari
             @endif
 
             <div class="cta">
-                <a href="mailto:{{ $inquiry->email }}?subject=Re: {{ $inquiry->tourPackage->name }} Inquiry" class="btn">Reply to Traveler</a>
+                <a href="mailto:{{ $inquiry->contact_email }}?subject=Re: {{ $package->name }} Inquiry" class="btn">Reply to Traveler</a>
                 <p style="color:#aaa;font-size:.8rem;margin-top:1rem;">You can also manage inquiries from your agency dashboard.</p>
             </div>
         </div>
         <div class="footer">
             <p>This email was sent by <strong>DORA Digital Tourism Connector</strong></p>
-            <p style="margin-top:.25rem;">© {{ date('Y') }} DORA. All rights reserved.</p>
+            <p style="margin-top:.25rem;">Copyright {{ date('Y') }} DORA. All rights reserved.</p>
         </div>
     </div>
 </div>

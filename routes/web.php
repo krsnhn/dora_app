@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DestinationController;
+use App\Http\Controllers\TravelerDashboardController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\MemoryController;
 use App\Http\Controllers\BackpackController;
@@ -32,6 +33,8 @@ require __DIR__.'/auth.php';
 
 // Traveler routes
 Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', TravelerDashboardController::class)->name('traveler.dashboard');
+
     // Favorites
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
     Route::post('/favorites/{destination}/toggle', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
@@ -40,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
     // Memories
     Route::get('/memories', [MemoryController::class, 'index'])->name('memories.index');
     Route::post('/memories', [MemoryController::class, 'store'])->name('memories.store');
+    Route::patch('/memories/albums/{album}', [MemoryController::class, 'updateAlbum'])->name('memories.albums.update');
     Route::delete('/memories/{memory}', [MemoryController::class, 'destroy'])->name('memories.destroy');
 
 
@@ -52,6 +56,7 @@ Route::middleware(['auth'])->prefix('backpack')->name('backpack.')->group(functi
     Route::delete('/clear-checked', [BackpackController::class, 'clearChecked'])->name('clear-checked');
     Route::post('/add-category', [BackpackController::class, 'addCategory'])->name('add-category');
     Route::post('/add-group', [BackpackController::class, 'addGroup'])->name('add-group');
+    Route::patch('/group/{group}', [BackpackController::class, 'updateGroup'])->name('update-group');
     Route::delete('/category/{category}', [BackpackController::class, 'deleteCategory'])->name('delete-category');
     Route::delete('/group/{group}', [BackpackController::class, 'deleteGroup'])->name('delete-group');
 });
@@ -72,6 +77,8 @@ Route::middleware(['auth'])->prefix('backpack')->name('backpack.')->group(functi
 // Agency routes
 Route::middleware(['auth', 'agency'])->prefix('agency')->name('agency.')->group(function () {
     Route::get('/dashboard', [AgencyDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/destinations/create', [AgencyDashboardController::class, 'createDestinationRequest'])->name('destinations.create');
+    Route::post('/destinations', [AgencyDashboardController::class, 'storeDestinationRequest'])->name('destinations.store');
 
     Route::resource('packages', TourPackageController::class)->except(['show']);
     
@@ -97,7 +104,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/destinations/{destination}/edit', [AdminDestinationController::class, 'edit'])->name('destinations.edit');
     Route::put('/destinations/{destination}', [AdminDestinationController::class, 'update'])->name('destinations.update');
     Route::patch('/destinations/{destination}/toggle', [AdminDestinationController::class, 'toggleApproval'])->name('destinations.toggle');
-    Route::post('/destination-requests/{request}/review', [AdminDestinationController::class, 'reviewRequest'])->name('destination-requests.review');
+    Route::post('/destination-requests/{destinationRequest}/review', [AdminDestinationController::class, 'reviewRequest'])->name('destination-requests.review');
 
     // Feedback moderation
     Route::get('/feedback', [FeedbackModerationController::class, 'index'])->name('feedback.index');

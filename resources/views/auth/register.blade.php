@@ -45,7 +45,7 @@
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-logo">
-                <div class="brand-logo">D</div>
+                <img class="brand-logo" src="{{ asset('doralogo.png') }}" alt="DORA logo">
                 <h1 class="auth-title">Create Your Account</h1>
                 <p class="auth-sub">Join DORA and start your travel journey</p>
             </div>

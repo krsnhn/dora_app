@@ -19,9 +19,19 @@ class DestinationController extends Controller
         $this->cloudinary = $cloudinary;
     }*/
 
-    public function index()
+    public function index(Request $request)
     {
-        $destinations = Destination::with('creator')->latest()->paginate(20);
+        $query = Destination::with('creator')->withCount('tourPackages');
+
+        if ($search = $request->get('search')) {
+            $query->search($search);
+        }
+
+        if ($request->filled('approved')) {
+            $query->where('is_approved', (bool) $request->get('approved'));
+        }
+
+        $destinations = $query->latest()->paginate(20)->withQueryString();
         $pendingRequests = DestinationRequest::with('agency')->where('status', 'pending')->latest()->get();
         return view('admin.destinations.index', compact('destinations', 'pendingRequests'));
     }
@@ -43,6 +53,7 @@ public function store(Request $request)
         'tags'        => 'nullable|string',
         'latitude'    => 'nullable|numeric',
         'longitude'   => 'nullable|numeric',
+        'weather_location' => 'nullable|string|max:255',
         'image'       => 'nullable|image|max:5120',
     ]);
 
@@ -73,6 +84,7 @@ public function update(Request $request, Destination $destination)
         'tags'        => 'nullable|string',
         'latitude'    => 'nullable|numeric',
         'longitude'   => 'nullable|numeric',
+        'weather_location' => 'nullable|string|max:255',
         'image'       => 'nullable|image|max:5120',
     ]);
 
@@ -116,9 +128,11 @@ public function update(Request $request, Destination $destination)
                 'location' => $destinationRequest->location,
                 'description' => $destinationRequest->description,
                 'image_path' => $destinationRequest->image_path,
+                'image_url' => $destinationRequest->image_url,
                 'tags' => $destinationRequest->tags,
                 'latitude' => $destinationRequest->latitude,
                 'longitude' => $destinationRequest->longitude,
+                'weather_location' => $destinationRequest->weather_location,
                 'is_approved' => true,
                 'created_by' => $destinationRequest->agency_id,
             ]);

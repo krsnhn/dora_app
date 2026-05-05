@@ -8,29 +8,52 @@ use App\Models\Destination;
 use App\Models\TourPackage;
 use App\Models\Feedback;
 use App\Models\Inquiry;
+use App\Models\DestinationRequest;
 
 class AdminController extends Controller
 {
-    /*public function __construct()
-    {
-        $this->middleware(['auth', 'admin']);
-    }*/
-
     public function dashboard()
     {
+        // Make sure ALL required keys are defined
         $stats = [
-            'travelers' => User::where('role', 'traveler')->count(),
-            'agencies' => User::where('role', 'agency')->count(),
-            'pending_agencies' => User::where('role', 'agency')->where('agency_status', 'pending')->count(),
-            'destinations' => Destination::approved()->count(),
-            'pending_destinations' => Destination::where('is_approved', false)->count(),
-            'packages' => TourPackage::active()->count(),
-            'inquiries' => Inquiry::count(),
+            'total_users' => User::count(),
+            'total_destinations' => Destination::count(),
+            'total_packages' => TourPackage::count(),
+            'pending_agencies' => User::where('role', 'agency')
+                ->where(function($query) {
+                    $query->where('agency_status', 'pending')
+                          ->orWhere('status', 'pending');
+                })->count(),
+            'total_inquiries' => Inquiry::count(),
             'pending_feedback' => Feedback::where('status', 'pending')->count(),
+            'pending_destinations' => DestinationRequest::where('status', 'pending')->count(),
         ];
 
-        $recentUsers = User::where('role', '!=', 'admin')->latest()->take(5)->get();
+        // Get recent users (excluding admins)
+        $recentUsers = User::where('role', '!=', 'admin')
+            ->latest()
+            ->take(5)
+            ->get();
 
-        return view('admin.dashboard', compact('stats', 'recentUsers'));
+        // Get recent feedback
+        $recentFeedback = Feedback::with('user')
+            ->where('status', 'pending')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $pendingDestinationRequests = DestinationRequest::with('agency')
+            ->where('status', 'pending')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Pass ALL variables to the view
+        return view('admin.dashboard', [
+            'stats' => $stats,
+            'recentUsers' => $recentUsers,
+            'recentFeedback' => $recentFeedback,
+            'pendingDestinationRequests' => $pendingDestinationRequests,
+        ]);
     }
 }

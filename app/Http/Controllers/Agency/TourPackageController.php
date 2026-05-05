@@ -5,18 +5,13 @@ namespace App\Http\Controllers\Agency;
 use App\Http\Controllers\Controller;
 use App\Models\TourPackage;
 use App\Models\Destination;
-use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class TourPackageController extends Controller
 {
-    protected CloudinaryService $cloudinary;
-
-   /* public function __construct(CloudinaryService $cloudinary)
+   /* public function __construct()
     {
         $this->middleware(['auth', 'agency']);
-        $this->cloudinary = $cloudinary;
     } */
 
     public function index(Request $request)
@@ -86,21 +81,9 @@ class TourPackageController extends Controller
             'description'    => 'required|string',
             'inclusions'     => 'nullable|string',
             'status'         => 'required|in:active,inactive',
-            'image'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
         ]);
 
         $validated['agency_id'] = auth()->id();
-
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            try {
-                $imageUrl = Cloudinary::upload($request->file('image')->getRealPath())->getSecurePath();
-                $validated['image_url'] = $imageUrl;
-            } catch (\Exception $e) {
-                // Log error but don't fail the creation
-                \Log::error('Image upload failed: ' . $e->getMessage());
-            }
-        }
 
         $package = TourPackage::create($validated);
 
@@ -117,6 +100,8 @@ class TourPackageController extends Controller
     }
     public function edit(TourPackage $package)
         {
+            $this->authorizePackage($package);
+
             $destinations = \App\Models\Destination::where('is_approved', true)
                 ->orderBy('name')
                 ->get();
@@ -126,6 +111,8 @@ class TourPackageController extends Controller
 
        public function update(Request $request, TourPackage $package)
         {
+            $this->authorizePackage($package);
+
             $validated = $request->validate([
                 'name'           => 'required|string|max:255',
                 'destination_id' => 'required|exists:destinations,id',

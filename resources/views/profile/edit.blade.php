@@ -3,10 +3,10 @@
 @section('title', 'Edit Profile')
 
 @section('content')
-<div class="page-header">
+<div class="page-header" style="background:linear-gradient(160deg,var(--deep-earth) 0%,var(--forest-green) 100%);color:white;">
     <div class="container">
-        <h1 class="page-title">Edit Profile</h1>
-        <p class="page-subtitle">Update your account information</p>
+        <h1 class="page-title" style="color:white;">Edit Profile</h1>
+        <p class="page-subtitle" style="color:rgba(255,255,255,0.9);">Update your account information</p>
     </div>
 </div>
 
@@ -22,7 +22,7 @@
     {{-- Profile Info --}}
     <div style="background:white;border-radius:16px;box-shadow:var(--shadow-md);padding:2rem;margin-bottom:1.5rem;">
         <h3 style="font-family:'Cormorant Garamond',serif;color:var(--deep-earth);font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--platinum-beige);font-weight:600;">Profile Information</h3>
-        <form method="POST" action="{{ route('profile.update') }}">
+        <form method="POST" action="{{ route('profile.update') }}" data-confirm="Save your profile changes?" data-confirm-title="Update Profile" data-confirm-text="Save">
             @csrf @method('PATCH')
             <div style="display:grid;gap:1.25rem;">
                 <div class="form-group">
@@ -76,7 +76,7 @@
     {{-- Change Password --}}
     <div style="background:white;border-radius:16px;box-shadow:var(--shadow-md);padding:2rem;margin-bottom:1.5rem;">
         <h3 style="font-family:'Cormorant Garamond',serif;color:var(--deep-earth);font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--platinum-beige);font-weight:600;">Change Password</h3>
-        <form method="POST" action="{{ route('password.update') }}">
+        <form method="POST" action="{{ route('password.update') }}" data-confirm="Update your password?" data-confirm-title="Update Password" data-confirm-text="Update">
             @csrf @method('PUT')
             <div style="display:grid;gap:1.25rem;">
                 <div class="form-group">
@@ -116,7 +116,7 @@
     <div style="background:white;border-radius:16px;padding:2rem;max-width:440px;width:90%;box-shadow:var(--shadow-lg);">
         <h3 style="font-family:'Cormorant Garamond',serif;color:#dc2626;margin-bottom:.75rem;font-size:1.5rem;font-weight:600;">Delete Account</h3>
         <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:1.5rem;line-height:1.6;">Are you sure you want to delete your account? This action cannot be undone.</p>
-        <form method="POST" action="{{ route('profile.destroy') }}">
+        <form method="POST" action="{{ route('profile.destroy') }}" data-confirm="Permanently delete your account? This cannot be undone." data-confirm-title="Delete Account" data-confirm-text="Delete" data-confirm-danger="true">
             @csrf @method('DELETE')
             <div class="form-group" style="margin-bottom:1.5rem;">
                 <label class="form-label">Enter your password to confirm</label>

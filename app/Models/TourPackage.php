@@ -8,7 +8,7 @@ class TourPackage extends Model
 {
     protected $fillable = [
         'agency_id', 'destination_id', 'name', 'description',
-        'price', 'duration', 'inclusions', 'image_path', 'status',
+        'price', 'duration', 'inclusions', 'image_path', 'image_url', 'status',
     ];
 
     public function agency() { return $this->belongsTo(User::class, 'agency_id'); }

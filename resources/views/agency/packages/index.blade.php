@@ -227,12 +227,13 @@
 </style>
 @endpush
 
-<div class="page-header">
-    <div class="page-header-content">
-        <h1>My <strong>Tour Packages</strong></h1>
-        <p>Manage your travel offerings and track inquiries</p>
+<div class="page-header" style="background:linear-gradient(160deg,var(--deep-earth) 0%,var(--forest-green) 100%);color:white;">
+    <div class="container">
+        <h1 class="page-title" style="color:white;">My <strong>Tour Packages</strong></h1>
+        <p class="page-subtitle" style="color:rgba(255,255,255,0.9);">Manage your travel offerings and track inquiries.</p>
     </div>
 </div>
+
 
 <div class="container">
     <!-- Filters Section -->
@@ -291,7 +292,7 @@
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <form method="POST" action="{{ route('agency.packages.store') }}" enctype="multipart/form-data" id="createPackageForm">
+            <form method="POST" action="{{ route('agency.packages.store') }}" id="createPackageForm" data-confirm="Create this tour package?" data-confirm-title="Create Package" data-confirm-text="Create">
                 @csrf
                 <div class="modal-body">
                     <div id="formErrors" style="display:none;margin-bottom:1.5rem;"></div>
@@ -344,21 +345,6 @@
                                   rows="2" placeholder="e.g. Accommodation, Meals, Transportation, Tour guide...">{{ old('inclusions') }}</textarea>
                         <div style="font-size:.8rem;color:var(--text-muted);margin-top:.4rem;">List what's included in this package</div>
                         @error('inclusions')<div class="form-error">{{ $message }}</div>@enderror
-                    </div>
-
-                    <div class="form-group" style="margin-bottom:1.5rem;">
-                        <label class="form-label">Package Image</label>
-                        <div id="imageDropzone" style="border:2px dashed var(--platinum-beige-dark);border-radius:var(--radius-sm);padding:2rem;text-align:center;cursor:pointer;transition:all .2s;background:white;">
-                            <svg width="40" height="40" fill="none" stroke="var(--forest-green)" stroke-width="1.5" viewBox="0 0 24 24" style="margin-bottom:.75rem;"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <p style="color:var(--text-dark);font-weight:500;margin-bottom:.25rem;">Drop image here or click to browse</p>
-                            <p style="color:var(--text-muted);font-size:.85rem;">JPG, PNG up to 5MB</p>
-                            <input type="file" name="image" id="imageInput" accept="image/*" style="display:none;">
-                        </div>
-                        <div id="imagePreview" style="display:none;margin-top:1rem;position:relative;">
-                            <img id="previewImg" style="width:100%;max-height:200px;object-fit:cover;border-radius:var(--radius-sm);" />
-                            <button type="button" onclick="clearImage()" style="position:absolute;top:.5rem;right:.5rem;background:rgba(0,0,0,.5);color:white;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1.1rem;line-height:1;">×</button>
-                        </div>
-                        @error('image')<div class="form-error">{{ $message }}</div>@enderror
                     </div>
 
                     <div class="form-group">
@@ -466,13 +452,16 @@
                                 @if($package->destination->image_url)
                                 <img src="{{ $package->destination->image_url }}" alt="{{ $package->name }}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;">
                                 @else
-                                <div style="width:48px;height:48px;border-radius:8px;background:var(--platinum-beige);display:flex;align-items:center;justify-content:center;">
-                                    <svg width="20" height="20" fill="none" stroke="var(--deep-earth)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                </div>
+                                <div style="width:48px;height:48px;border-radius:8px;background:var(--platinum-beige);color:var(--text-muted);display:flex;align-items:center;justify-content:center;text-align:center;font-size:.52rem;font-weight:800;line-height:1.1;text-transform:uppercase;">No Photo</div>
                                 @endif
                                 <div>
                                     <div style="font-weight:600;color:var(--deep-earth);">{{ $package->name }}</div>
                                     <div style="font-size:.8rem;color:var(--text-muted);">{{ Str::limit($package->description, 50) }}</div>
+                                    @if($package->inclusions)
+                                        <div style="font-size:.78rem;color:var(--forest-green);margin-top:.25rem;">
+                                            <strong>Inclusions:</strong> {{ Str::limit($package->inclusions, 90) }}
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </td>
@@ -501,7 +490,7 @@
                         <td>
                             <div style="display:flex;gap:.5rem;">
                                 <a href="{{ route('agency.packages.edit', $package) }}" class="btn btn-secondary btn-sm">Edit</a>
-                                <form method="POST" action="{{ route('agency.packages.destroy', $package) }}" onsubmit="return confirm('Delete this package?')">
+                                <form method="POST" action="{{ route('agency.packages.destroy', $package) }}" data-confirm="Delete this package?" data-confirm-title="Delete Package" data-confirm-text="Delete" data-confirm-danger="true">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:none;cursor:pointer;">Delete</button>
                                 </form>
@@ -548,8 +537,6 @@ function closeModal(modalId) {
     // Reset form when closing create modal
     if (modalId === 'createPackageModal') {
         document.getElementById('createPackageForm').reset();
-        document.getElementById('imagePreview').style.display = 'none';
-        document.getElementById('imageDropzone').style.display = 'block';
     }
 }
 
@@ -559,49 +546,6 @@ document.addEventListener('click', function(e) {
         closeModal(e.target.id);
     }
 });
-
-// Image upload handling for create package modal
-const dropzone = document.getElementById('imageDropzone');
-const input = document.getElementById('imageInput');
-const preview = document.getElementById('imagePreview');
-const previewImg = document.getElementById('previewImg');
-
-if (dropzone && input && preview && previewImg) {
-    dropzone.addEventListener('click', () => input.click());
-    dropzone.addEventListener('dragover', e => { 
-        e.preventDefault(); 
-        dropzone.style.borderColor='var(--forest)'; 
-    });
-    dropzone.addEventListener('dragleave', () => 
-        dropzone.style.borderColor='var(--platinum-beige-dark)'
-    );
-    dropzone.addEventListener('drop', e => { 
-        e.preventDefault(); 
-        dropzone.style.borderColor='var(--platinum-beige-dark)'; 
-        handleFile(e.dataTransfer.files[0]); 
-    });
-    input.addEventListener('change', () => handleFile(input.files[0]));
-}
-
-function handleFile(file) {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => { 
-        previewImg.src = e.target.result; 
-        preview.style.display='block'; 
-        dropzone.style.display='none'; 
-    };
-    reader.readAsDataURL(file);
-    const dt = new DataTransfer(); 
-    dt.items.add(file); 
-    input.files = dt.files;
-}
-
-function clearImage() {
-    input.value = ''; 
-    preview.style.display='none'; 
-    dropzone.style.display='block';
-}
 
 // View package inquiries
 function viewPackageInquiries(packageId, packageName) {
@@ -683,9 +627,9 @@ function renderInquiries(inquiries, packageId) {
                         Reply
                     </a>
 
-                    <form method="POST" action="/agency/inquiries/${inquiry.id}/status" style="margin:0;">
+                    <form method="POST" action="/agency/inquiries/${inquiry.id}/status" data-confirm="Update this inquiry status?" data-confirm-title="Update Inquiry" data-confirm-text="Update" style="margin:0;">
                         @csrf @method('PATCH')
-                        <select name="status" class="form-input" style="font-size:.75rem;padding:.3rem .5rem;margin-bottom:.3rem;" onchange="this.form.submit()">
+                        <select name="status" class="form-input" style="font-size:.75rem;padding:.3rem .5rem;margin-bottom:.3rem;" onchange="this.form.requestSubmit()">
                             <option value="pending" ${inquiry.status === 'pending' ? 'selected' : ''}>Pending</option>
                             <option value="contacted" ${inquiry.status === 'contacted' ? 'selected' : ''}>Contacted</option>
                             <option value="confirmed" ${inquiry.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
@@ -781,7 +725,7 @@ document.getElementById('createPackageForm').addEventListener('submit', function
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred. Please try again.');
+        window.doraAlert('An error occurred. Please try again.', 'Package Not Created');
     })
     .finally(() => {
         // Reset button

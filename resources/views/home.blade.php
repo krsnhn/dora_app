@@ -418,7 +418,7 @@
                         @if($destination->image_url)
                             <img src="{{ $destination->image_url }}" alt="{{ $destination->name }}" loading="lazy">
                         @else
-                            <div class="dest-card-img-placeholder">🏝️</div>
+                            <div class="dest-card-img-placeholder">No Photo Available</div>
                         @endif
                         <span class="dest-card-country">{{ $destination->country }}</span>
                     </div>

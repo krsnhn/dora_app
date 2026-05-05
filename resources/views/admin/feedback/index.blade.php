@@ -3,10 +3,10 @@
 @section('title', 'Feedback Moderation')
 
 @section('content')
-<div class="page-header">
+<div class="page-header" style="background:linear-gradient(160deg,var(--deep-earth) 0%,var(--forest-green) 100%);color:white;">
     <div class="container">
-        <h1 class="page-title">Feedback Moderation</h1>
-        <p class="page-subtitle">Review and moderate traveler feedback</p>
+        <h1 class="page-title" style="color:white;">Feedback Moderation</h1>
+        <p class="page-subtitle" style="color:rgba(255,255,255,0.9);">Review and moderate traveler feedback</p>
     </div>
 </div>
 
@@ -85,7 +85,7 @@
 
                 <div style="display:flex;flex-direction:column;gap:.5rem;min-width:120px;">
                     @if($fb->status !== 'approved')
-                    <form method="POST" action="{{ route('admin.feedback.update', $fb) }}">
+                    <form method="POST" action="{{ route('admin.feedback.update', $fb) }}" data-confirm="Approve this feedback?" data-confirm-title="Approve Feedback" data-confirm-text="Approve">
                         @csrf @method('PATCH')
                         <input type="hidden" name="status" value="approved">
                         <button type="submit" class="btn btn-sm" style="background:#dcfce7;color:var(--forest);border:none;cursor:pointer;width:100%;">
@@ -94,7 +94,7 @@
                     </form>
                     @endif
                     @if($fb->status !== 'rejected')
-                    <form method="POST" action="{{ route('admin.feedback.update', $fb) }}">
+                    <form method="POST" action="{{ route('admin.feedback.update', $fb) }}" data-confirm="Reject this feedback?" data-confirm-title="Reject Feedback" data-confirm-text="Reject" data-confirm-danger="true">
                         @csrf @method('PATCH')
                         <input type="hidden" name="status" value="rejected">
                         <button type="submit" class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:none;cursor:pointer;width:100%;">
@@ -103,7 +103,7 @@
                     </form>
                     @endif
                     @if($fb->status !== 'pending')
-                    <form method="POST" action="{{ route('admin.feedback.update', $fb) }}">
+                    <form method="POST" action="{{ route('admin.feedback.update', $fb) }}" data-confirm="Reset this feedback to pending?" data-confirm-title="Reset Feedback" data-confirm-text="Reset">
                         @csrf @method('PATCH')
                         <input type="hidden" name="status" value="pending">
                         <button type="submit" class="btn btn-sm" style="background:#fef3c7;color:#92400e;border:none;cursor:pointer;width:100%;">

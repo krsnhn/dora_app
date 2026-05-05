@@ -3,14 +3,14 @@
 @section('title', 'Add Destination')
 
 @section('content')
-<div class="page-header">
+<div class="page-header" style="background:linear-gradient(160deg,var(--deep-earth) 0%,var(--forest-green) 100%);color:white;">
     <div class="container">
-        <a href="{{ route('admin.destinations.index') }}" style="display:inline-flex;align-items:center;gap:.4rem;color:var(--text-muted);text-decoration:none;font-size:.9rem;margin-bottom:.75rem;">
+        <a href="{{ route('admin.destinations.index') }}" style="display:inline-flex;align-items:center;gap:.4rem;color:rgba(255,255,255,0.8);text-decoration:none;font-size:.9rem;margin-bottom:.75rem;">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
             Back to Destinations
         </a>
-        <h1 class="page-title">Add New Destination</h1>
-        <p class="page-subtitle">Create a new destination for the platform</p>
+        <h1 class="page-title" style="color:white;">Add New Destination</h1>
+        <p class="page-subtitle" style="color:rgba(255,255,255,0.9);">Create a new destination for the platform</p>
     </div>
 </div>
 

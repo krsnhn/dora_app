@@ -3,10 +3,10 @@
 @section('title', 'User Management')
 
 @section('content')
-<div class="page-header">
+<div class="page-header" style="background:linear-gradient(160deg,var(--deep-earth) 0%,var(--forest-green) 100%);color:white;">
     <div class="container">
-        <h1 class="page-title">User Management</h1>
-        <p class="page-subtitle">Manage all registered users and agencies</p>
+        <h1 class="page-title" style="color:white;">User Management</h1>
+        <p class="page-subtitle" style="color:rgba(255,255,255,0.9);">Manage all registered users and agencies</p>
     </div>
 </div>
 
@@ -105,7 +105,7 @@
 
                                 {{-- Toggle Active/Suspend --}}
                                 @if($user->role !== 'admin')
-                                <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}">
+                                <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}" data-confirm="{{ $user->status === 'active' ? 'Suspend this user?' : 'Activate this user?' }}" data-confirm-title="{{ $user->status === 'active' ? 'Suspend User' : 'Activate User' }}" data-confirm-text="{{ $user->status === 'active' ? 'Suspend' : 'Activate' }}" data-confirm-danger="{{ $user->status === 'active' ? 'true' : 'false' }}">
                                     @csrf @method('PATCH')
                                     <button type="submit" class="btn btn-sm"
                                             style="background:{{ $user->status === 'active' ? '#fee2e2' : '#dcfce7' }};color:{{ $user->status === 'active' ? '#dc2626' : 'var(--forest)' }};border:none;cursor:pointer;">
@@ -133,7 +133,7 @@
 <div id="verifyModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;">
     <div style="background:white;border-radius:16px;padding:2rem;max-width:500px;width:90%;box-shadow:var(--shadow-lg);">
         <h3 style="color:var(--earth);margin-bottom:1.5rem;" id="modalTitle">Verify Agency</h3>
-        <form method="POST" id="verifyForm">
+        <form method="POST" id="verifyForm" data-confirm="Submit this agency verification decision?" data-confirm-title="Verify Agency" data-confirm-text="Submit">
             @csrf @method('PATCH')
             <div class="form-group" style="margin-bottom:1rem;">
                 <label class="form-label">Decision *</label>
@@ -157,7 +157,7 @@
 <script>
 function openVerifyModal(userId, userName, currentStatus) {
     document.getElementById('modalTitle').textContent = 'Verify: ' + userName;
-    document.getElementById('verifyForm').action = '/admin/users/' + userId + '/verify';
+    document.getElementById('verifyForm').action = '/admin/users/' + userId + '/verify-agency';
     document.getElementById('verifyModal').style.display = 'flex';
 }
 function closeVerifyModal() {

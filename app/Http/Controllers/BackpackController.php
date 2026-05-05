@@ -2,133 +2,171 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BackpackGroup;
 use App\Models\BackpackItem;
 use Illuminate\Http\Request;
 
 class BackpackController extends Controller
 {
-    /*public function __construct()
-    {
-        $this->middleware('auth');
-    } */
+    private const CATEGORIES = [
+        'essentials',
+        'documents',
+        'clothing',
+        'toiletries',
+        'electronics',
+        'medicine',
+        'gear',
+        'snacks',
+        'other',
+    ];
 
     public function index(Request $request)
     {
-        $selectedGroup = $request->get('group', 'default');
-        
-        $items = auth()->user()->backpackItems()
-            ->where('group_name', $selectedGroup)
+        $groups = auth()->user()->backpackGroups()
+            ->withCount([
+                'items',
+                'items as checked_items_count' => fn ($query) => $query->where('is_checked', true),
+            ])
+            ->latest()
+            ->get();
+
+        if ($groups->isEmpty()) {
+            $groups = collect([
+                auth()->user()->backpackGroups()->create(['title' => 'Default Trip']),
+            ]);
+        }
+
+        $selectedGroup = $request->filled('group')
+            ? auth()->user()->backpackGroups()->findOrFail($request->get('group'))
+            : $groups->first();
+
+        $items = $selectedGroup->items()
             ->orderBy('category')
             ->orderBy('created_at')
             ->get();
-        
-        $groups = auth()->user()->backpackItems()
-            ->select('group_name')
-            ->distinct()
-            ->pluck('group_name')
-            ->toArray();
-        
-        // Add 'default' to groups if not already present
-        if (!in_array('default', $groups)) {
-            $groups[] = 'default';
-        }
-        
-        return view('traveler.backpack.index', compact('items', 'groups', 'selectedGroup'));
+
+        $categoryOptions = self::CATEGORIES;
+
+        return view('traveler.backpack.index', compact('groups', 'selectedGroup', 'items', 'categoryOptions'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'group_id' => 'required|exists:backpack_groups,id',
             'name' => 'required|string|max:255',
-            'category' => 'required|string|max:100',
-            'group_name' => 'nullable|string|max:255',
+            'category' => 'required|in:' . implode(',', self::CATEGORIES),
         ]);
 
-        auth()->user()->backpackItems()->create([
-            'name' => $validated['name'],
+        $group = auth()->user()->backpackGroups()->findOrFail($validated['group_id']);
+
+        $group->items()->create([
+            'user_id' => auth()->id(),
+            'item_name' => $validated['name'],
             'category' => $validated['category'],
-            'group_name' => $validated['group_name'] ?? 'default',
+            'group_name' => $group->title,
         ]);
 
-        return back()->with('success', 'Item added to your backpack!');
+        return redirect()->route('backpack.index', ['group' => $group->id])
+            ->with('success', 'Checklist item added.');
     }
 
     public function toggle(BackpackItem $item)
     {
-        if ($item->user_id !== auth()->id()) {
-            abort(403);
-        }
-
+        $this->authorizeItem($item);
         $item->update(['is_checked' => !$item->is_checked]);
 
-        return back()->with('success', $item->is_checked ? 'Item checked!' : 'Item unchecked.');
+        return back()->with('success', $item->is_checked ? 'Item marked packed.' : 'Item marked unpacked.');
     }
 
     public function destroy(BackpackItem $item)
     {
-        if ($item->user_id !== auth()->id()) {
-            abort(403);
-        }
-
+        $this->authorizeItem($item);
         $item->delete();
 
-        return back()->with('success', 'Item removed from your backpack.');
+        return back()->with('success', 'Checklist item removed.');
     }
 
     public function clearChecked(Request $request)
     {
-        $groupName = $request->get('group_name', 'default');
-        
-        auth()->user()->backpackItems()
-            ->where('group_name', $groupName)
-            ->where('is_checked', true)
-            ->delete();
+        $group = auth()->user()->backpackGroups()->findOrFail($request->get('group_id'));
+        $group->items()->where('is_checked', true)->delete();
 
-        return back()->with('success', 'All checked items have been removed.');
+        return redirect()->route('backpack.index', ['group' => $group->id])
+            ->with('success', 'Packed items cleared.');
     }
 
     public function addCategory(Request $request)
     {
         $validated = $request->validate([
-            'category_name' => 'required|string|max:255',
-            'group_name' => 'nullable|string|max:255',
+            'category_name' => 'required|string|max:100',
+            'group_id' => 'required|exists:backpack_groups,id',
         ]);
-        
-        // Categories are just strings stored with items, no separate table needed
-        // Just return success message
-        return back()->with('success', 'Category "' . ucfirst($validated['category_name']) . '" created. You can now add items to this category.');
+
+        return redirect()->route('backpack.index', ['group' => $validated['group_id']])
+            ->with('success', 'Category "' . ucfirst($validated['category_name']) . '" is ready. Add an item using that category.');
     }
 
     public function addGroup(Request $request)
     {
         $validated = $request->validate([
-            'group_name' => 'required|string|max:255',
-            'travel_date' => 'nullable|date',
+            'title' => 'required|string|max:255',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
-        
-        return redirect()->route('backpack.index', ['group' => $validated['group_name']])
-            ->with('success', 'Trip "' . $validated['group_name'] . '" created! Start adding items.');
+
+        $group = auth()->user()->backpackGroups()->create($validated);
+
+        return redirect()->route('backpack.index', ['group' => $group->id])
+            ->with('success', 'Checklist group created.');
+    }
+
+    public function updateGroup(Request $request, BackpackGroup $group)
+    {
+        $this->authorizeGroup($group);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $group->update($validated);
+        $group->items()->update(['group_name' => $group->title]);
+
+        return redirect()->route('backpack.index', ['group' => $group->id])
+            ->with('success', 'Checklist group updated.');
     }
 
     public function deleteCategory(Request $request, $category)
     {
-        $groupName = $request->get('group_name', 'default');
-        
-        auth()->user()->backpackItems()
-            ->where('group_name', $groupName)
-            ->where('category', $category)
-            ->delete();
-        
-        return back()->with('success', 'Category "' . ucfirst($category) . '" and all its items have been deleted.');
+        $group = auth()->user()->backpackGroups()->findOrFail($request->get('group_id'));
+        $group->items()->where('category', $category)->delete();
+
+        return redirect()->route('backpack.index', ['group' => $group->id])
+            ->with('success', 'Category and its items deleted.');
     }
 
-    public function deleteGroup($group)
+    public function deleteGroup(BackpackGroup $group)
     {
-        auth()->user()->backpackItems()
-            ->where('group_name', $group)
-            ->delete();
-        
+        $this->authorizeGroup($group);
+        $group->delete();
+
         return redirect()->route('backpack.index')
-            ->with('success', 'Trip "' . $group . '" and all its items have been deleted.');
+            ->with('success', 'Checklist group deleted.');
+    }
+
+    private function authorizeItem(BackpackItem $item): void
+    {
+        if ($item->user_id !== auth()->id()) {
+            abort(403);
+        }
+    }
+
+    private function authorizeGroup(BackpackGroup $group): void
+    {
+        if ($group->user_id !== auth()->id()) {
+            abort(403);
+        }
     }
 }

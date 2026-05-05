@@ -24,16 +24,15 @@ class FavoriteController extends Controller
     public function toggle(Destination $destination)
     {
         $user = auth()->user();
-        $existing = Favorite::where('user_id', $user->id)
-            ->where('destination_id', $destination->id)
-            ->first();
+        $favoriteQuery = Favorite::where('user_id', $user->id)
+            ->where('destination_id', $destination->id);
 
-        if ($existing) {
-            $existing->delete();
+        if ($favoriteQuery->exists()) {
+            $favoriteQuery->delete();
             $message = 'Removed from favorites.';
             $favorited = false;
         } else {
-            Favorite::create([
+            Favorite::firstOrCreate([
                 'user_id' => $user->id, 
                 'destination_id' => $destination->id
             ]);

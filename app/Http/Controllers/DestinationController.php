@@ -43,7 +43,23 @@ class DestinationController extends Controller
         $destination->load(['tourPackages.agency', 'memories' => fn($q) => $q->latest()->take(6)]);
         $weather = null;
 
-        if ($destination->weather_location || $destination->location) {
+        if ($destination->latitude && $destination->longitude) {
+            $weather = $this->weatherService->getOneCallWeather(
+                (float) $destination->latitude,
+                (float) $destination->longitude,
+                $destination->name
+            );
+
+            if (!$weather) {
+                $weather = $this->weatherService->getWeatherByCoordinates(
+                    (float) $destination->latitude,
+                    (float) $destination->longitude,
+                    $destination->name
+                );
+            }
+        }
+
+        if (!$weather && ($destination->weather_location || $destination->location)) {
             $weather = $this->weatherService->getWeather(
                 $destination->weather_location ?: $destination->location . ',' . $destination->country
             );

@@ -4,7 +4,7 @@
 <style>
     .dest-hero { position: relative; height: 480px; overflow: hidden; }
     .dest-hero img { width: 100%; height: 100%; object-fit: cover; }
-    .dest-hero-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, var(--deep-earth), var(--ocean-blue)); display: flex; align-items: center; justify-content: center; font-size: 8rem; }
+    .dest-hero-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, var(--deep-earth), var(--ocean-blue)); display: flex; align-items: center; justify-content: center; color:white; font-size:1rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; text-align:center; }
     .dest-hero-overlay {
         position: absolute; inset: 0;
         background: linear-gradient(to top, rgba(44,24,16,0.85) 0%, rgba(44,24,16,0.2) 60%, transparent 100%);
@@ -61,6 +61,13 @@
     .weather-detail { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 0.75rem; }
     .weather-detail-label { font-size: 0.7rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
     .weather-detail-val { font-size: 1rem; font-weight: 600; margin-top: 0.2rem; }
+    .forecast-list { display: grid; gap: 0.5rem; margin-top: 1rem; }
+    .forecast-row { display: grid; grid-template-columns: 48px 34px 1fr auto; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 0.45rem 0.55rem; }
+    .forecast-day { font-size: 0.75rem; font-weight: 700; }
+    .forecast-date { font-size: 0.7rem; opacity: 0.7; }
+    .forecast-desc { font-size: 0.75rem; opacity: 0.82; text-transform: capitalize; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .forecast-temp { font-size: 0.78rem; font-weight: 800; white-space: nowrap; }
+    .weather-alert { margin-top: 1rem; background: rgba(249,115,74,0.18); border: 1px solid rgba(255,255,255,0.18); border-radius: 8px; padding: 0.7rem; font-size: 0.82rem; }
     /* Packages */
     .package-card {
         border: 1px solid rgba(44,24,16,0.08);
@@ -112,10 +119,10 @@
 
 <!-- Hero Image -->
 <div class="dest-hero">
-    @if($destination->image_path)
-        <img src="{{ $destination->image_path }}" alt="{{ $destination->name }}">
+    @if($destination->image_url || $destination->image_path)
+        <img src="{{ $destination->image_url ?: $destination->image_path }}" alt="{{ $destination->name }}">
     @else
-        <div class="dest-hero-placeholder">🏝️</div>
+        <div class="dest-hero-placeholder">No Photo Available</div>
     @endif
     <div class="dest-hero-overlay"></div>
     <div class="dest-hero-content">
@@ -131,12 +138,19 @@
             <span>📍 {{ $destination->location }}, {{ $destination->country }}</span>
             <span>📦 {{ $destination->tourPackages->count() }} packages</span>
             @if(auth()->check() && auth()->user()->role === 'traveler')
-            <form action="{{ route('favorites.toggle', $destination) }}" method="POST" style="display:inline;">
+            <form action="{{ route('favorites.toggle', $destination) }}" method="POST" style="display:inline;" data-confirm="{{ $isFavorited ? 'Remove this destination from your favorites?' : 'Save this destination to your favorites?' }}" data-confirm-title="{{ $isFavorited ? 'Remove Favorite' : 'Save Favorite' }}" data-confirm-text="{{ $isFavorited ? 'Remove' : 'Save' }}" data-confirm-danger="{{ $isFavorited ? 'true' : 'false' }}">
                 @csrf
                 <button type="submit" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:0.375rem 1rem;border-radius:20px;cursor:pointer;font-size:0.8rem;font-family:'Jost',sans-serif;">
                     {{ $isFavorited ? '❤️ Saved' : '🤍 Save' }}
                 </button>
             </form>
+            @endauth
+            @auth
+                @if(auth()->user()->isAgency())
+                    <a href="{{ route('agency.packages.create', ['destination_id' => $destination->id]) }}" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:0.375rem 1rem;border-radius:20px;font-size:0.8rem;font-family:'Jost',sans-serif;text-decoration:none;">
+                        Add Package
+                    </a>
+                @endif
             @endauth
         </div>
     </div>
@@ -170,8 +184,10 @@
             <script>
                 const map = L.map('map').setView([{{ $destination->latitude }}, {{ $destination->longitude }}], 13);
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    subdomains: 'abcd',
+                    maxZoom: 20
                 }).addTo(map);
 
                 L.marker([{{ $destination->latitude }}, {{ $destination->longitude }}])
@@ -205,11 +221,48 @@
                             <span>✅ Inclusions available</span>
                             @endif
                         </div>
+                        @if($package->inclusions)
+                            <div style="font-size:.82rem;color:var(--text-muted);line-height:1.55;margin:-.35rem 0 1rem;padding:.75rem;border-radius:8px;background:var(--off-white);">
+                                <strong style="color:var(--deep-earth);">Inclusions:</strong>
+                                {{ $package->inclusions }}
+                            </div>
+                        @endif
                         @if(auth()->check() && auth()->user()->role === 'traveler')
-                            <button class="btn btn-primary btn-sm" type="button"
-                                onclick="openInquiry({{ $package->id }}, '{{ addslashes($package->name) }}', '{{ addslashes($package->agency->business_name ?? $package->agency->name) }}')">
-                                Inquire Now →
-                            </button>
+                            <details style="margin-top:1rem;">
+                                <summary class="btn btn-primary btn-sm" style="display:inline-flex;list-style:none;">Inquire Now</summary>
+                                <form method="POST" action="{{ route('inquiries.store', $package) }}" style="margin-top:1rem;padding:1rem;border:1px solid var(--line);border-radius:10px;background:var(--surface-soft);">
+                                    @csrf
+                                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;">
+                                        <div class="form-group">
+                                            <label class="form-label">Your Name *</label>
+                                            <input type="text" name="contact_name" class="form-input" value="{{ auth()->user()->name }}" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Email *</label>
+                                            <input type="email" name="contact_email" class="form-input" value="{{ auth()->user()->email }}" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Phone</label>
+                                            <input type="tel" name="contact_phone" class="form-input" placeholder="+63 9XX XXX XXXX">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Pax *</label>
+                                            <input type="number" name="pax" class="form-input" value="1" min="1" max="100" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Preferred Travel Date</label>
+                                        <input type="date" name="travel_date" class="form-input" min="{{ date('Y-m-d', strtotime('+1 day')) }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Message</label>
+                                        <textarea name="message" class="form-input" rows="3" placeholder="Tell the agency about your plans or questions."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Send Inquiry</button>
+                                </form>
+                            </details>
+                        @elseif(auth()->check() && auth()->user()->isAgency() && $package->agency_id === auth()->id())
+                            <a href="{{ route('agency.inquiries.index', ['package_id' => $package->id]) }}" class="btn btn-primary btn-sm">View Inquiries</a>
                         @endif
                     </div>
                     @endforeach
@@ -268,11 +321,11 @@
             <div class="weather-details">
                 <div class="weather-detail">
                     <div class="weather-detail-label">Humidity</div>
-                    <div class="weather-detail-val">{{ $weather['humidity'] }}%</div>
+                    <div class="weather-detail-val">{{ $weather['humidity'] ?? 'N/A' }}{{ isset($weather['humidity']) ? '%' : '' }}</div>
                 </div>
                 <div class="weather-detail">
                     <div class="weather-detail-label">Wind</div>
-                    <div class="weather-detail-val">{{ $weather['wind_speed'] }} km/h</div>
+                    <div class="weather-detail-val">{{ $weather['wind_speed'] ?? 'N/A' }}{{ isset($weather['wind_speed']) ? ' km/h' : '' }}</div>
                 </div>
                 <div class="weather-detail">
                     <div class="weather-detail-label">Feels Like</div>
@@ -283,6 +336,38 @@
                     <div class="weather-detail-val">{{ $weather['condition'] }}</div>
                 </div>
             </div>
+            @if(!empty($weather['forecast_days']))
+                <div class="weather-title" style="margin-top:1.25rem;margin-bottom:.65rem;">8-Day Forecast</div>
+                <div class="forecast-list">
+                    @foreach($weather['forecast_days'] as $day)
+                        <div class="forecast-row">
+                            <div>
+                                <div class="forecast-day">{{ $day['day'] }}</div>
+                                <div class="forecast-date">{{ $day['date'] }}</div>
+                            </div>
+                            <img src="https://openweathermap.org/img/wn/{{ $day['icon'] }}.png" alt="{{ $day['condition'] }}" style="width:34px;height:34px;" onerror="this.style.display='none'">
+                            <div class="forecast-desc">{{ $day['description'] ?: $day['condition'] }}</div>
+                            <div class="forecast-temp">{{ $day['min'] }}° / {{ $day['max'] }}°</div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+            @if(!empty($weather['alerts']))
+                @foreach($weather['alerts'] as $alert)
+                    <div class="weather-alert">
+                        <strong>{{ $alert['event'] }}</strong>
+                        @if($alert['description'])
+                            <div style="opacity:.82;margin-top:.25rem;">{{ Str::limit($alert['description'], 120) }}</div>
+                        @endif
+                    </div>
+                @endforeach
+            @endif
+        </div>
+        @else
+        <div class="weather-card">
+            <div class="weather-title">Weather Update</div>
+            <div style="font-size:1.15rem;font-weight:700;margin-bottom:.4rem;">Weather currently unavailable</div>
+            <p style="opacity:.78;font-size:.9rem;">OpenWeather updates will appear here when the destination has a valid weather query.</p>
         </div>
         @endif
 
@@ -306,7 +391,7 @@
 
             @if(auth()->check() && auth()->user()->role === 'traveler')
             <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--platinum-beige-dark);">
-                <form action="{{ route('favorites.toggle', $destination) }}" method="POST">
+                <form action="{{ route('favorites.toggle', $destination) }}" method="POST" data-confirm="{{ $isFavorited ? 'Remove this destination from your favorites?' : 'Save this destination to your favorites?' }}" data-confirm-title="{{ $isFavorited ? 'Remove Favorite' : 'Save Favorite' }}" data-confirm-text="{{ $isFavorited ? 'Remove' : 'Save' }}" data-confirm-danger="{{ $isFavorited ? 'true' : 'false' }}">
                     @csrf
                     <button type="submit" class="btn {{ $isFavorited ? 'btn-outline' : 'btn-primary' }}" style="width:100%;justify-content:center;">
                         {{ $isFavorited ? '❤️ Saved to Favorites' : '🤍 Save to Favorites' }}
@@ -394,9 +479,6 @@
             </div>
             <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Send Inquiry →</button>
         </form>
-        @else
-        <p style="text-align:center;color:var(--text-muted);margin-bottom:1.5rem;">Please sign in to send an inquiry.</p>
-        <a href="{{ route('login') }}" class="btn btn-primary" style="width:100%;justify-content:center;">Sign In to Inquire</a>
         @endauth
     </div>
 </div>
@@ -424,6 +506,6 @@ function setRating(value) {
         s.style.color = i < value ? '#f59e0b' : '#d4c5a4';
     });
 }
-
+</script>
 @endpush
 @endsection

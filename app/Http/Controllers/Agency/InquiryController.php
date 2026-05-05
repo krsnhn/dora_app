@@ -29,7 +29,7 @@ class InquiryController extends Controller
         }
 
         if ($packageId = $request->get('package_id')) {
-            $query->where('tour_package_id', $packageId);
+            $query->where('package_id', $packageId);
         }
 
         $inquiries = $query->latest()->paginate(15);

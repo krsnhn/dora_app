@@ -46,7 +46,7 @@
             <h2 style="font-family:'Cormorant Garamond',serif;color:var(--deep-earth);font-size:2.25rem;margin-bottom:.75rem;font-weight:600;">What We Stand For</h2>
             <p style="color:var(--text-muted);max-width:500px;margin:0 auto;">Our core values guide every decision we make and every feature we build.</p>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;max-width:1000px;margin:0 auto;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;max-width:1200px;margin:0 auto;">
             @php
             $values = [
                 ['icon'=>'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z','title'=>'Trust & Safety','desc'=>'Verified agencies and secure transactions give travelers peace of mind.'],

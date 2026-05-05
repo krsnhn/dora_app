@@ -3,10 +3,10 @@
 @section('title', 'Inquiries')
 
 @section('content')
-<div class="page-header">
+<div class="page-header" style="background:linear-gradient(160deg,var(--deep-earth) 0%,var(--forest-green) 100%);color:white;">
     <div class="container">
-        <h1 class="page-title">Inquiries</h1>
-        <p class="page-subtitle">Manage traveler inquiries about your packages</p>
+        <h1 class="page-title" style="color:white;">Inquiries</h1>
+        <p class="page-subtitle" style="color:rgba(255,255,255,0.9);">Manage traveler inquiries about your packages</p>
     </div>
 </div>
 
@@ -88,9 +88,9 @@
                     </a>
 
                     {{-- Status Update --}}
-                    <form method="POST" action="{{ route('agency.inquiries.update', $inquiry) }}">
+                    <form method="POST" action="{{ route('agency.inquiries.status', $inquiry) }}" data-confirm="Update this inquiry status?" data-confirm-title="Update Inquiry" data-confirm-text="Update">
                         @csrf @method('PATCH')
-                        <select name="status" class="form-input" style="font-size:.8rem;padding:.4rem .6rem;margin-bottom:.4rem;" onchange="this.form.submit()">
+                        <select name="status" class="form-input" style="font-size:.8rem;padding:.4rem .6rem;margin-bottom:.4rem;" onchange="this.form.requestSubmit()">
                             <option value="pending" {{ $inquiry->status === 'pending' ? 'selected' : '' }}>Pending</option>
                             <option value="contacted" {{ $inquiry->status === 'contacted' ? 'selected' : '' }}>Contacted</option>
                             <option value="confirmed" {{ $inquiry->status === 'confirmed' ? 'selected' : '' }}>Confirmed</option>
