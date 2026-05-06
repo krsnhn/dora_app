@@ -15,7 +15,14 @@ class User extends Authenticatable
         'name', 'email', 'password', 'role', 'status',
         'business_name', 'facebook_page', 'phone', 'address',
         'valid_id_path', 'verification_notes', 'agency_status',
+        'profile_photo',
     ];
+
+    public function profilePhotoUrl(): string
+    {
+        return $this->profile_photo
+            ?? 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=6b4c35&color=fff&size=128';
+    }
 
     protected $hidden = ['password', 'remember_token'];
 

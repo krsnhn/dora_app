@@ -85,24 +85,30 @@
         .dropdown-item:hover{background:var(--platinum-beige)}.dropdown-item-danger{color:#dc2626}.dropdown-divider{height:1px;background:var(--line);margin:.4rem}.dropdown-user-info{padding:.7rem .8rem;border-bottom:1px solid var(--line);margin-bottom:.4rem}.dropdown-user-name{font-weight:700}.dropdown-user-role{font-size:.78rem;color:var(--text-muted);text-transform:capitalize}
 
         .app-shell{min-height:100vh;display:grid;grid-template-columns:280px minmax(0,1fr);background:var(--off-white)}
-        .app-sidebar{position:sticky;top:0;height:100vh;background:var(--surface);border-right:1px solid var(--line);padding:1rem;display:flex;flex-direction:column;gap:1rem;transition:width .2s}
-        .sidebar-header{height:52px;display:flex;align-items:center;justify-content:space-between;gap:.75rem}
-        .sidebar-toggle,.theme-toggle{width:38px;height:38px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text-dark);display:grid;place-items:center;cursor:pointer}
+        .app-sidebar{position:sticky;top:0;height:100vh;background:var(--surface);border-right:1px solid var(--line);padding:1rem;display:flex;flex-direction:column;gap:1rem;transition:width .2s;overflow-y:auto;min-width:0}
+        .sidebar-logo-section{display:none}
+        .sidebar-toggle,.theme-toggle{width:38px;height:38px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text-dark);display:grid;place-items:center;cursor:pointer;transition:transform .3s ease;flex-shrink:0}
         .sidebar-toggle:hover,.theme-toggle:hover{background:var(--platinum-beige)}
-        .sidebar-user{padding:.9rem;border:1px solid var(--line);border-radius:12px;background:var(--surface-soft)}
+        .sidebar-toggle svg{transition:transform .3s ease}
+        body.sidebar-collapsed .sidebar-toggle svg{transform:rotate(180deg)}
+        .sidebar-user{padding:.9rem;border:1px solid var(--line);border-radius:12px;background:var(--surface-soft);flex-shrink:0}
+        .sidebar-user strong{display:block;font-size:.93rem}.sidebar-user span{font-size:.78rem;color:var(--text-muted);text-transform:capitalize}
+        .sidebar-nav-wrapper{flex:1;display:flex;flex-direction:column;gap:1rem;overflow-y:auto;min-width:0}
         .sidebar-user strong{display:block;font-size:.93rem}.sidebar-user span{font-size:.78rem;color:var(--text-muted);text-transform:capitalize}
         .sidebar-section{display:flex;flex-direction:column;gap:.25rem}.sidebar-label{font-size:.68rem;font-weight:800;color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin:.65rem .7rem .25rem}
         .sidebar-link{display:flex;align-items:center;gap:.7rem;padding:.72rem .78rem;border-radius:9px;color:var(--text-muted);text-decoration:none;font-weight:650;font-size:.91rem}
         .sidebar-link:hover,.sidebar-link.active{background:rgba(37,107,143,.12);color:var(--text-dark)}
         .sidebar-link svg{width:18px;height:18px;flex:0 0 18px}
         .sidebar-footer{margin-top:auto;display:grid;gap:.5rem}
+        body.sidebar-collapsed .sidebar-user,body.sidebar-collapsed .sidebar-label{display:none}
         .app-main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
         .app-topbar{height:64px;position:sticky;top:0;z-index:50;background:rgba(247,247,244,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem}
         body[data-theme="dark"] .app-topbar{background:rgba(15,19,22,.9)}
         .topbar-title{font-weight:800}.topbar-actions{display:flex;align-items:center;gap:.65rem}
         .app-content{flex:1;min-width:0}
         body.sidebar-collapsed .app-shell{grid-template-columns:86px minmax(0,1fr)}
-        body.sidebar-collapsed .sidebar-text,body.sidebar-collapsed .brand-tagline,body.sidebar-collapsed .sidebar-user,body.sidebar-collapsed .sidebar-label{display:none}
+        body.sidebar-collapsed .sidebar-link span{display:none}
+        body.sidebar-collapsed .sidebar-user,body.sidebar-collapsed .sidebar-label{display:none}
         body.sidebar-collapsed .app-sidebar{align-items:center}.mobile-sidebar-toggle{display:none}
 
         .flash-container{max-width:1280px;margin:1rem auto 0;padding:0 1.5rem}.app-main .flash-container{width:100%;max-width:none}
@@ -124,7 +130,7 @@
         .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem}.stat-card{padding:1.25rem}.stat-number{font-size:2rem;font-weight:800;color:var(--text-dark);line-height:1}.stat-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);font-weight:800;margin-top:.35rem}
         .grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}.kpi-card{padding:1.25rem}.kpi-icon{width:40px;height:40px;border-radius:9px;display:grid;place-items:center;background:rgba(37,107,143,.12);margin-bottom:.75rem}.kpi-num{font-size:2rem;font-weight:800;color:var(--text-dark);line-height:1}.kpi-label{color:var(--text-muted);font-size:.82rem;font-weight:650;margin-top:.35rem}
 
-        .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.7rem 1rem;border-radius:8px;border:1px solid transparent;font:inherit;font-size:.9rem;font-weight:750;text-decoration:none;cursor:pointer;transition:.16s;min-height:40px}
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.7rem 1rem;border-radius:8px;border:1px solid transparent;font:inherit;font-size:.9rem;font-weight:750;text-decoration:none;cursor:pointer;transition:.16s;min-height:40px;min-width:40px}
         .btn-primary{background:var(--primary);color:white}.btn-primary:hover{background:var(--primary-light)}
         .btn-secondary{background:var(--text-dark);color:var(--surface)}.btn-secondary:hover{opacity:.88}
         .btn-outline{background:transparent;border-color:var(--line);color:var(--text-dark)}.btn-outline:hover{background:var(--platinum-beige)}
@@ -138,9 +144,8 @@
 
         footer{background:var(--surface);border-top:1px solid var(--line);padding:3rem 1rem 1.5rem;margin-top:auto}.footer-inner{max-width:1280px;margin:0 auto}.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2rem;margin-bottom:2rem}.footer-title{font-weight:800;font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;color:var(--text-muted);margin-bottom:.9rem}.footer-links{list-style:none;display:grid;gap:.55rem}.footer-links a{text-decoration:none;color:var(--text-muted);font-size:.9rem}.footer-bottom{border-top:1px solid var(--line);padding-top:1rem;display:flex;justify-content:space-between;gap:1rem;color:var(--text-muted);font-size:.82rem}
 
-        @media(max-width:1000px){.app-shell{grid-template-columns:1fr}.app-sidebar{position:fixed;z-index:80;left:0;top:0;transform:translateX(-105%);width:280px}.sidebar-open .app-sidebar{transform:none}.mobile-sidebar-toggle{display:grid}.grid-4{grid-template-columns:repeat(2,1fr)}body.sidebar-collapsed .app-shell{grid-template-columns:1fr}}
-        @media(max-width:768px){.navbar-nav{display:none;position:absolute;left:0;right:0;top:68px;background:var(--surface);border-bottom:1px solid var(--line);padding:1rem;flex-direction:column;align-items:stretch}.navbar-nav.open{display:flex}.nav-toggle{display:block}.nav-dropdown-menu{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none}.footer-grid{grid-template-columns:1fr 1fr}.page-header h1,.page-title{font-size:2rem}.app-topbar{padding:0 1rem}.grid-4{grid-template-columns:1fr}.footer-bottom{flex-direction:column}}
-        @media(max-width:520px){.footer-grid{grid-template-columns:1fr}.container{padding:0 1rem}}
+        @media(max-width:768px){.app-shell{grid-template-columns:86px minmax(0,1fr)}body:not(.sidebar-collapsed) .app-shell{grid-template-columns:min(280px,78vw) minmax(0,1fr)}body:not(.sidebar-collapsed) .app-sidebar{width:min(280px,78vw)}body.sidebar-collapsed .app-sidebar{width:86px}.grid-4{grid-template-columns:1fr}.navbar-nav{display:none;position:fixed;left:0;right:0;top:68px;background:var(--surface);border-bottom:1px solid var(--line);padding:1rem;flex-direction:column;align-items:stretch;z-index:70}.navbar-nav.open{display:flex}.nav-toggle{display:block}.nav-dropdown-menu{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none}.footer-grid{grid-template-columns:1fr 1fr}.page-header h1,.page-title{font-size:2rem}.app-topbar{padding:0 1rem}.footer-bottom{flex-direction:column}}
+        @media(max-width:520px){.footer-grid{grid-template-columns:1fr}.container{padding:0 1rem}.app-shell{grid-template-columns:74px minmax(0,1fr)}body:not(.sidebar-collapsed) .app-shell{grid-template-columns:min(248px,76vw) minmax(0,1fr)}body:not(.sidebar-collapsed) .app-sidebar{width:min(248px,76vw)}body.sidebar-collapsed .app-sidebar{width:74px}body.sidebar-collapsed .sidebar-link{justify-content:center;padding:.72rem}body:not(.sidebar-collapsed) .sidebar-link{justify-content:flex-start}}
     </style>
     @stack('styles')
 </head>
@@ -154,6 +159,7 @@
             'Platform' => [
                 ['label' => 'Admin Dashboard', 'route' => 'admin.dashboard', 'active' => 'admin.dashboard', 'icon' => 'M3 13h8V3H3v10zm10 8h8V3h-8v18zM3 21h8v-6H3v6z'],
                 ['label' => 'Users', 'route' => 'admin.users.index', 'active' => 'admin.users.*', 'icon' => 'M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4-8a4 4 0 11-8 0 4 4 0 018 0zm8 2a3 3 0 11-6 0 3 3 0 016 0z'],
+                ['label' => 'Agencies', 'route' => 'admin.agencies.index', 'active' => 'admin.agencies.*', 'icon' => 'M3 21h18M5 21V7l7-4 7 4v14M9 11h6M9 15h6'],
                 ['label' => 'Destinations', 'route' => 'admin.destinations.index', 'active' => 'admin.destinations.*', 'icon' => 'M12 21s7-4.35 7-11a7 7 0 10-14 0c0 6.65 7 11 7 11zm0-8a3 3 0 100-6 3 3 0 000 6z'],
                 ['label' => 'Feedback', 'route' => 'admin.feedback.index', 'active' => 'admin.feedback.*', 'icon' => 'M12 17.3L6.1 21l1.6-6.7L2.5 9.8l6.9-.6L12 3l2.6 6.2 6.9.6-5.2 4.5 1.6 6.7L12 17.3z'],
             ],
@@ -175,6 +181,7 @@
             'Traveler' => [
                 ['label' => 'Traveler Dashboard', 'route' => 'traveler.dashboard', 'active' => 'traveler.dashboard', 'icon' => 'M3 13h8V3H3v10zm10 8h8V3h-8v18zM3 21h8v-6H3v6z'],
                 ['label' => 'Destinations', 'route' => 'destinations.index', 'active' => 'destinations.*', 'icon' => 'M12 21s7-4.35 7-11a7 7 0 10-14 0c0 6.65 7 11 7 11z'],
+                ['label' => 'Agencies', 'route' => 'agencies.index', 'active' => 'agencies.*', 'icon' => 'M3 21h18M5 21V7l7-4 7 4v14M9 11h6M9 15h6'],
                 ['label' => 'Favorites', 'route' => 'favorites.index', 'active' => 'favorites.*', 'icon' => 'M12 21C7 17 4 14.5 4 10a4 4 0 017-2.6A4 4 0 0118 10c0 4.5-3 7-6 11z'],
                 ['label' => 'Backpack', 'route' => 'backpack.index', 'active' => 'backpack.*', 'icon' => 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z'],
                 ['label' => 'Memories', 'route' => 'memories.index', 'active' => 'memories.*', 'icon' => 'M4 5h16v14H4zM8 13l2-2 3 3 2-2 3 4'],
@@ -223,32 +230,30 @@
 @else
     <div class="app-shell">
         <aside class="app-sidebar">
-            <div class="sidebar-header">
-                <a href="{{ $user->isAdmin() ? route('admin.dashboard') : ($user->isAgency() ? route('agency.dashboard') : route('traveler.dashboard')) }}" class="navbar-brand">
-                    <img class="brand-logo" src="{{ asset('doralogo.png') }}" alt="DORA logo">
-                    <span class="sidebar-text"><span class="brand-name">DORA</span><span class="brand-tagline">Connector</span></span>
-                </a>
-                <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar">
-                    <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-                </button>
-            </div>
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar">
+                <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
 
             <div class="sidebar-user">
+                <img src="{{ $user->profilePhotoUrl() }}" alt="avatar"
+                     style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.25);margin-bottom:.5rem;display:block;">
                 <strong>{{ $user->business_name ?: $user->name }}</strong>
                 <span>{{ $user->role }}</span>
             </div>
 
-            @foreach($navGroups as $group => $links)
-                <nav class="sidebar-section" aria-label="{{ $group }}">
-                    <div class="sidebar-label">{{ $group }}</div>
-                    @foreach($links as $link)
-                        <a href="{{ route($link['route']) }}" class="sidebar-link {{ request()->routeIs($link['active']) ? 'active' : '' }}">
-                            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="{{ $link['icon'] }}"/></svg>
-                            <span class="sidebar-text">{{ $link['label'] }}</span>
-                        </a>
-                    @endforeach
-                </nav>
-            @endforeach
+            <div class="sidebar-nav-wrapper">
+                @foreach($navGroups as $group => $links)
+                    <nav class="sidebar-section" aria-label="{{ $group }}">
+                        <div class="sidebar-label">{{ $group }}</div>
+                        @foreach($links as $link)
+                            <a href="{{ route($link['route']) }}" class="sidebar-link {{ request()->routeIs($link['active']) ? 'active' : '' }}">
+                                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="{{ $link['icon'] }}"/></svg>
+                                <span class="sidebar-text">{{ $link['label'] }}</span>
+                            </a>
+                        @endforeach
+                    </nav>
+                @endforeach
+            </div>
 
             <div class="sidebar-footer">
                 @if(!$user->isAdmin())
@@ -269,11 +274,11 @@
 
         <div class="app-main">
             <header class="app-topbar">
-                <div style="display:flex;align-items:center;gap:.65rem;">
-                    <button class="sidebar-toggle mobile-sidebar-toggle" id="mobileSidebarToggle" type="button" aria-label="Open sidebar">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-                    </button>
-                    <span class="topbar-title">@yield('title', ucfirst($role).' Dashboard')</span>
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <a href="{{ $user->isAdmin() ? route('admin.dashboard') : ($user->isAgency() ? route('agency.dashboard') : route('traveler.dashboard')) }}" class="navbar-brand" style="gap:.5rem;">
+                        <img class="brand-logo" src="{{ asset('doralogo.png') }}" alt="DORA logo" style="width:44px;height:44px;">
+                        <span class="topbar-title" style="margin:0;">@yield('title', ucfirst($role).' Dashboard')</span>
+                    </a>
                 </div>
                 <div class="topbar-actions">
                     <a href="{{ route('destinations.index') }}" class="btn btn-outline btn-sm">Browse</a>
@@ -319,15 +324,11 @@
         document.body.classList.toggle('sidebar-collapsed');
         localStorage.setItem('dora-sidebar-collapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0');
     });
-    if (localStorage.getItem('dora-sidebar-collapsed') === '1') {
+    if (window.matchMedia('(max-width: 768px)').matches && localStorage.getItem('dora-sidebar-collapsed') === null) {
+        document.body.classList.add('sidebar-collapsed');
+    } else if (localStorage.getItem('dora-sidebar-collapsed') === '1') {
         document.body.classList.add('sidebar-collapsed');
     }
-    document.getElementById('mobileSidebarToggle')?.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
-    document.addEventListener('click', (event) => {
-        if (!event.target.closest('.app-sidebar') && !event.target.closest('#mobileSidebarToggle')) {
-            document.body.classList.remove('sidebar-open');
-        }
-    });
 
     document.querySelectorAll('.flash').forEach(el => {
         setTimeout(() => {

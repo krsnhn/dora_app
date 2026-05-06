@@ -31,7 +31,16 @@ class UserManagementController extends Controller
         }
 
         if ($status = $request->get('status')) {
-            $query->where('status', $status);
+            $query->where(function ($q) use ($status) {
+                $q->where('status', $status);
+
+                if (in_array($status, ['pending', 'approved', 'rejected'])) {
+                    $q->orWhere(function ($agencyQuery) use ($status) {
+                        $agencyQuery->where('role', 'agency')
+                            ->where('agency_status', $status);
+                    });
+                }
+            });
         }
 
         $users = $query->latest()->paginate(20);
@@ -47,24 +56,51 @@ class UserManagementController extends Controller
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $user->update([
-            'agency_status' => $validated['action'] === 'approve' ? 'approved' : 'rejected',
-            'status' => $validated['action'] === 'approve' ? 'active' : 'suspended',
-            'verification_notes' => $validated['notes'],
+        $isApproving = $validated['action'] === 'approve';
+        
+        $user->fill([
+            'agency_status' => $isApproving ? 'approved' : 'rejected',
+            'status' => $isApproving ? 'active' : 'suspended',
+            'verification_notes' => $validated['notes'] ?? null,
         ]);
+        $user->save();
 
-        $action = $validated['action'] === 'approve' ? 'approved' : 'rejected';
+        $emailService = app(EmailService::class);
+        
+        // Send appropriate email based on action
+        if ($isApproving) {
+            $emailService->sendAgencyApprovalEmail($user);
+            $message = 'Agency approved successfully. Notification email sent.';
+        } else {
+            $emailService->sendAgencyRejectionEmail($user, $validated['notes'] ?? null);
+            $message = 'Agency rejected. Notification email sent.';
+        }
 
-         // Send approval email
-        app(EmailService::class)->sendAgencyApprovalEmail($user);
-
-        return back()->with('success', "Agency {$action} successfully.");
+        return back()->with('success', $message);
     }
 
     public function toggleStatus(User $user)
     {
+        $emailService = app(EmailService::class);
+
+        if ($user->role === 'agency') {
+            if ($user->agency_status !== 'approved' || $user->status !== 'active') {
+                return back()->with('error', 'Only active approved agencies can be suspended here. Use verification to activate inactive/rejected agencies.');
+            }
+
+            $user->update(['status' => 'suspended']);
+            $emailService->sendAccountSuspendedEmail($user);
+            return back()->with('success', 'Agency suspended successfully. Notification email sent.');
+        }
+
         $newStatus = $user->status === 'active' ? 'suspended' : 'active';
         $user->update(['status' => $newStatus]);
+
+        if ($newStatus === 'suspended') {
+            $emailService->sendAccountSuspendedEmail($user);
+            return back()->with('success', 'User status updated to suspended. Notification email sent.');
+        }
+
         return back()->with('success', "User status updated to {$newStatus}.");
     }
 

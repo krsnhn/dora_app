@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class TourPackage extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'agency_id', 'destination_id', 'name', 'description',
         'price', 'duration', 'inclusions', 'image_path', 'image_url', 'status',
@@ -17,6 +20,16 @@ class TourPackage extends Model
     public function feedback() { return $this->hasMany(Feedback::class, 'package_id'); }
 
     public function scopeActive($query) { return $query->where('status', 'active'); }
+
+    public function scopePubliclyListed($query)
+    {
+        return $query->where('status', 'active')
+            ->whereHas('agency', function ($agencyQuery) {
+                $agencyQuery->where('role', 'agency')
+                    ->where('agency_status', 'approved')
+                    ->where('status', 'active');
+            });
+    }
 
     protected $appends = ['display_image'];
 

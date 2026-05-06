@@ -30,7 +30,10 @@ return new class extends Migration
             }
         });
 
-        DB::statement('ALTER TABLE backpack_items MODIFY category VARCHAR(100) NOT NULL DEFAULT "essentials"');
+        // Only modify column for MySQL (SQLite doesn't support MODIFY syntax)
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE backpack_items MODIFY category VARCHAR(100) NOT NULL DEFAULT "essentials"');
+        }
 
         $legacyGroups = DB::table('backpack_items')
             ->select('user_id', 'group_name')

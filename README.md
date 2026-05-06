@@ -259,11 +259,206 @@ dora_app/
 
 ---
 
-## 🧪 Running Tests
+## 🧪 Testing
 
-```bash
-php artisan test
+The DORA App includes a comprehensive test suite covering unit tests, feature tests, and integration tests using **PHPUnit** (Laravel's native testing framework).
+
+### Test Suite Overview
+
+| Test Category | Coverage | Command |
+|---|---|---|
+| **Unit Tests** | Services, Models | `composer test:unit` |
+| **Feature Tests** | Routes, Controllers, Auth, CRUD | `composer test:feature` |
+| **All Tests** | Full suite | `composer test` |
+| **Coverage Report** | Code coverage analysis | `composer test:coverage` |
+
+### Test Structure
+
 ```
+tests/
+├── Unit/
+│   ├── Services/
+│   │   ├── CloudinaryServiceTest.php   # Image upload/delete
+│   │   ├── EmailServiceTest.php        # Email notifications
+│   │   └── WeatherServiceTest.php      # Weather API integration
+│   └── Models/
+│       ├── UserTest.php                # Role checking, relationships
+│       ├── DestinationTest.php         # Tags, approval status
+│       └── TourPackageTest.php         # Scopes, relationships
+├── Feature/
+│   ├── Auth/
+│   │   ├── AuthenticationTest.php      # Login, register, logout
+│   │   └── RoleAuthorizationTest.php   # Role-based access control
+│   ├── Package/
+│   │   └── PackageCRUDTest.php         # Create, read, update, delete
+│   ├── Destination/
+│   │   └── DestinationCRUDTest.php     # Destination management
+│   └── Inquiry/
+│       └── InquirySubmissionTest.php   # Inquiry creation & status
+└── TestCase.php                        # Base test class with helpers
+```
+
+### Setting Up Tests
+
+The test environment is automatically configured via `.env.testing`:
+
+```env
+APP_ENV=testing
+DB_CONNECTION=testing
+DB_DATABASE=:memory:           # SQLite in-memory for fast tests
+CACHE_DRIVER=array             # No persistence
+QUEUE_CONNECTION=sync          # Synchronous jobs
+SESSION_DRIVER=array           # Array-based sessions
+MAIL_DRIVER=log                # Log emails instead of sending
+```
+
+### Running Tests
+
+#### Run All Tests
+```bash
+composer test
+```
+
+#### Run Unit Tests Only
+```bash
+composer test:unit
+```
+
+#### Run Feature Tests Only
+```bash
+composer test:feature
+```
+
+#### Generate Coverage Report
+```bash
+composer test:coverage
+```
+
+Generates an HTML coverage report in `build/coverage/` showing which lines/methods are tested.
+
+#### Run Specific Test
+```bash
+php artisan test tests/Feature/Auth/AuthenticationTest.php
+php artisan test tests/Unit/Services/WeatherServiceTest.php
+```
+
+#### Parallel Test Execution
+```bash
+php artisan test --parallel
+```
+
+### Test Coverage
+
+The test suite covers:
+
+✅ **Authentication**
+- User registration (traveler, agency, admin)
+- Login/logout flows
+- Password validation
+
+✅ **Authorization & Roles**
+- Traveler access control
+- Agency-only routes
+- Admin-only routes
+- Unapproved agency restrictions
+
+✅ **Services**
+- Cloudinary image uploads/deletes
+- OpenWeatherMap API integration & caching
+- Email notification sending
+
+✅ **CRUD Operations**
+- Tour package creation, editing, deletion
+- Destination creation & approval
+- Inquiry submission & status updates
+
+✅ **Model Relationships**
+- User → Destinations, Packages, Inquiries
+- Destination → Tour Packages
+- TourPackage → Inquiries
+
+✅ **Data Validation**
+- Email format validation
+- Price/quantity constraints
+- Required field validation
+- Coordinate precision
+
+### Writing New Tests
+
+All test classes inherit from `Tests\TestCase`, which provides:
+
+```php
+// Authenticate as specific role
+$this->actingAsTraveler();
+$this->actingAsAgency();
+$this->actingAsAdmin();
+
+// Database assertions
+$this->assertDatabaseHas('users', ['email' => 'test@example.com']);
+$this->assertDatabaseMissing('users', ['id' => 999]);
+
+// Authentication assertions
+$this->assertAuthenticatedAs($user);
+$this->assertGuest();
+
+// Response assertions
+$response->assertStatus(200);
+$response->assertRedirect('/login');
+$response->assertSessionHasErrors('email');
+```
+
+### Test Database
+
+By default, tests use an **in-memory SQLite database** for speed. To use a file-based database instead:
+
+Edit `phpunit.xml`:
+```xml
+<env name="DB_DATABASE" value="database/database_test.sqlite"/>
+```
+
+### Mocking External Services
+
+Tests mock external APIs to avoid real API calls:
+
+```php
+// Mock HTTP requests
+Http::fake([
+    'https://api.openweathermap.org/*' => Http::response([...])
+]);
+
+// Mock email
+Mail::fake();
+Mail::assertSent(MailableClass::class);
+
+// Mock Cloudinary
+// Configuration done via .env.testing
+```
+
+### Continuous Integration
+
+To run tests in CI/CD (GitHub Actions, etc.):
+
+```yaml
+- name: Run Tests
+  run: composer test
+
+- name: Generate Coverage
+  run: composer test:coverage
+```
+
+### Troubleshooting
+
+**Tests fail with "No such table":**
+- Ensure migrations are created in `TestCase::setUp()`
+- Check `database/migrations/` exist
+
+**Email tests fail:**
+- Confirm `Mail::fake()` is called in test setup
+- Check `MAIL_DRIVER=log` in `.env.testing`
+
+**Weather API tests fail:**
+- Verify `Http::fake()` is configured before HTTP calls
+- Check `OPENWEATHER_API_KEY` in `.env.testing` is set
 
 ---
 

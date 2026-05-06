@@ -30,10 +30,10 @@ class InquiryController extends Controller
         $validated = $request->validate([
             'contact_name' => 'required|string|max:255',
             'contact_email' => 'required|email|max:255',
-            'contact_phone' => 'nullable|string|max:30',
+            'contact_phone' => 'required|string|max:30',
             'pax' => 'required|integer|min:1|max:100',
-            'travel_date' => 'nullable|date|after:today',
-            'message' => 'nullable|string|max:1000',
+            'travel_date' => 'required|date|after:today',
+            'message' => 'required|string|max:1000',
         ]);
 
         $inquiry = Inquiry::create([

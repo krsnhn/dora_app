@@ -440,7 +440,7 @@
                 
                 <div class="card-footer">
                     <span style="font-size:.8rem;color:var(--text-muted);">
-                        📦 {{ $dest->tourPackages()->where('status','active')->count() }} packages available
+                        📦 {{ $dest->tour_packages_count }} packages available
                     </span>
                     <a href="{{ route('destinations.show', $dest) }}" class="btn btn-primary btn-sm">Explore →</a>
                 </div>

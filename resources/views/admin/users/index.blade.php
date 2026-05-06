@@ -28,6 +28,7 @@
                 <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
                 <option value="suspended" {{ request('status') === 'suspended' ? 'selected' : '' }}>Suspended</option>
                 <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved (Agencies)</option>
             </select>
             <button type="submit" class="btn btn-primary">Filter</button>
             @if(request()->hasAny(['search','role','status']))
@@ -70,12 +71,18 @@
                             </span>
                         </td>
                         <td>
-                            @if($user->status === 'active')
-                                <span class="badge badge-success">Active</span>
-                            @elseif($user->status === 'pending')
+                            @if($user->role === 'agency' && $user->agency_status === 'rejected')
+                                <span class="badge" style="background:#fee2e2;color:#dc2626;">Rejected</span>
+                            @elseif($user->role === 'agency' && $user->agency_status === 'pending')
                                 <span class="badge badge-warning">Pending</span>
+                            @elseif($user->role === 'agency' && $user->status === 'suspended')
+                                <span class="badge badge-danger">Inactive</span>
+                            @elseif($user->status === 'active')
+                                <span class="badge badge-success">Active</span>
                             @elseif($user->status === 'suspended')
                                 <span class="badge badge-danger">Suspended</span>
+                            @elseif($user->status === 'pending')
+                                <span class="badge badge-warning">Pending</span>
                             @else
                                 <span class="badge" style="background:#fee2e2;color:#dc2626;">{{ ucfirst($user->status) }}</span>
                             @endif
@@ -98,13 +105,21 @@
                         <td>
                             <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
                                 {{-- Agency Verification --}}
-                                @if($user->role === 'agency' && in_array($user->status, ['pending','rejected']))
-                                <button onclick="openVerifyModal({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ $user->status }}')"
-                                        class="btn btn-sm btn-primary">Verify</button>
+                                @if($user->role === 'agency' && ($user->agency_status !== 'approved' || $user->status !== 'active'))
+                                <button onclick="openVerifyModal({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ $user->agency_status ?? 'pending' }}')"
+                                    class="btn btn-sm btn-primary">Verify</button>
                                 @endif
 
                                 {{-- Toggle Active/Suspend --}}
-                                @if($user->role !== 'admin')
+                                @if($user->role === 'agency' && $user->agency_status === 'approved' && $user->status === 'active')
+                                <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}" data-confirm="Suspend this agency?" data-confirm-title="Suspend Agency" data-confirm-text="Suspend" data-confirm-danger="true">
+                                    @csrf @method('PATCH')
+                                    <button type="submit" class="btn btn-sm"
+                                            style="background:#fee2e2;color:#dc2626;border:none;cursor:pointer;">
+                                        Suspend
+                                    </button>
+                                </form>
+                                @elseif($user->role !== 'admin' && $user->role !== 'agency')
                                 <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}" data-confirm="{{ $user->status === 'active' ? 'Suspend this user?' : 'Activate this user?' }}" data-confirm-title="{{ $user->status === 'active' ? 'Suspend User' : 'Activate User' }}" data-confirm-text="{{ $user->status === 'active' ? 'Suspend' : 'Activate' }}" data-confirm-danger="{{ $user->status === 'active' ? 'true' : 'false' }}">
                                     @csrf @method('PATCH')
                                     <button type="submit" class="btn btn-sm"
@@ -134,17 +149,17 @@
     <div style="background:white;border-radius:16px;padding:2rem;max-width:500px;width:90%;box-shadow:var(--shadow-lg);">
         <h3 style="color:var(--earth);margin-bottom:1.5rem;" id="modalTitle">Verify Agency</h3>
         <form method="POST" id="verifyForm" data-confirm="Submit this agency verification decision?" data-confirm-title="Verify Agency" data-confirm-text="Submit">
-            @csrf @method('PATCH')
+            @csrf
             <div class="form-group" style="margin-bottom:1rem;">
                 <label class="form-label">Decision *</label>
-                <select name="agency_status" class="form-control" id="verifyDecision">
-                    <option value="approved">✅ Approve Agency</option>
-                    <option value="rejected">❌ Reject Agency</option>
+                <select name="action" class="form-control" id="verifyDecision">
+                    <option value="approve">✅ Approve Agency</option>
+                    <option value="reject">❌ Reject Agency</option>
                 </select>
             </div>
             <div class="form-group" style="margin-bottom:1.5rem;">
                 <label class="form-label">Notes (optional)</label>
-                <textarea name="verification_notes" class="form-control" rows="3" placeholder="Add notes about this decision..."></textarea>
+                <textarea name="notes" class="form-control" rows="3" placeholder="Add notes about this decision..."></textarea>
             </div>
             <div style="display:flex;gap:.75rem;">
                 <button type="submit" class="btn btn-primary">Submit</button>
@@ -158,6 +173,7 @@
 function openVerifyModal(userId, userName, currentStatus) {
     document.getElementById('modalTitle').textContent = 'Verify: ' + userName;
     document.getElementById('verifyForm').action = '/admin/users/' + userId + '/verify-agency';
+    document.getElementById('verifyDecision').value = currentStatus === 'approved' ? 'approve' : 'reject';
     document.getElementById('verifyModal').style.display = 'flex';
 }
 function closeVerifyModal() {

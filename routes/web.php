@@ -9,10 +9,12 @@ use App\Http\Controllers\MemoryController;
 use App\Http\Controllers\BackpackController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\AgencyDirectoryController;
 use App\Http\Controllers\Agency\AgencyDashboardController;
 use App\Http\Controllers\Agency\TourPackageController;
 use App\Http\Controllers\Agency\InquiryController as AgencyInquiryController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AgencyDirectoryController as AdminAgencyDirectoryController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\DestinationController as AdminDestinationController;
 use App\Http\Controllers\Admin\FeedbackModerationController;
@@ -34,6 +36,8 @@ require __DIR__.'/auth.php';
 // Traveler routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', TravelerDashboardController::class)->name('traveler.dashboard');
+    Route::get('/agencies', [AgencyDirectoryController::class, 'index'])->name('agencies.index');
+    Route::get('/agencies/{user}', [AgencyDirectoryController::class, 'show'])->name('agencies.show');
 
     // Favorites
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
@@ -70,6 +74,7 @@ Route::middleware(['auth'])->prefix('backpack')->name('backpack.')->group(functi
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo');
     Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
@@ -109,4 +114,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Feedback moderation
     Route::get('/feedback', [FeedbackModerationController::class, 'index'])->name('feedback.index');
     Route::patch('/feedback/{feedback}', [FeedbackModerationController::class, 'update'])->name('feedback.update');
+
+    // Agency directory
+    Route::get('/agencies', [AdminAgencyDirectoryController::class, 'index'])->name('agencies.index');
+    Route::get('/agencies/{user}', [AdminAgencyDirectoryController::class, 'show'])->name('agencies.show');
 });

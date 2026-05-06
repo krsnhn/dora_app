@@ -19,6 +19,26 @@
     </div>
     @endif
 
+    {{-- Profile Photo --}}
+    <div style="background:white;border-radius:16px;box-shadow:var(--shadow-md);padding:2rem;margin-bottom:1.5rem;">
+        <h3 style="font-family:'Cormorant Garamond',serif;color:var(--deep-earth);font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--platinum-beige);font-weight:600;">Profile Photo</h3>
+        <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+            <img src="{{ $user->profilePhotoUrl() }}" alt="Profile photo"
+                 style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--platinum-beige);flex-shrink:0;">
+            <form method="POST" action="{{ route('profile.photo') }}" enctype="multipart/form-data" style="flex:1;min-width:220px;">
+                @csrf
+                <div class="form-group" style="margin-bottom:.75rem;">
+                    <label class="form-label">Upload new photo</label>
+                    <input type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp"
+                           class="form-input" style="padding:.45rem .75rem;">
+                    @error('profile_photo')<div class="form-error">{{ $message }}</div>@enderror
+                    <p style="font-size:.78rem;color:var(--text-muted);margin-top:.35rem;">JPEG, PNG or WebP · max 2 MB</p>
+                </div>
+                <button type="submit" class="btn btn-primary" style="padding:.5rem 1.25rem;font-size:.9rem;">Upload Photo</button>
+            </form>
+        </div>
+    </div>
+
     {{-- Profile Info --}}
     <div style="background:white;border-radius:16px;box-shadow:var(--shadow-md);padding:2rem;margin-bottom:1.5rem;">
         <h3 style="font-family:'Cormorant Garamond',serif;color:var(--deep-earth);font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--platinum-beige);font-weight:600;">Profile Information</h3>

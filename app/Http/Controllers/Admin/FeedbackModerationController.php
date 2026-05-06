@@ -15,8 +15,15 @@ class FeedbackModerationController extends Controller
 
     public function index()
     {
-        $feedback = Feedback::with(['user', 'agency', 'package.destination'])->latest()->paginate(20);
-        return view('admin.feedback.index', compact('feedback'));
+        $feedbacks = Feedback::with(['user', 'agency', 'package.destination'])
+            ->when(request('status'), fn ($query, $status) => $query->where('status', $status), function ($query) {
+                $query->where('status', 'pending');
+            })
+            ->when(request('rating'), fn ($query, $rating) => $query->where('rating', $rating))
+            ->latest()
+            ->paginate(20);
+
+        return view('admin.feedback.index', compact('feedbacks'));
     }
 
     public function update(Request $request, Feedback $feedback)

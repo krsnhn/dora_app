@@ -25,12 +25,12 @@ class TravelerDashboardController extends Controller
             ->get();
 
         $featuredDestinations = Destination::approved()
-            ->withCount('tourPackages')
+            ->withCount(['tourPackages' => fn ($query) => $query->publiclyListed()])
             ->latest()
             ->take(4)
             ->get();
 
-        $recommendedPackages = TourPackage::active()
+        $recommendedPackages = TourPackage::publiclyListed()
             ->with(['destination', 'agency'])
             ->latest()
             ->take(4)

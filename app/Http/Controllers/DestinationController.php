@@ -18,7 +18,8 @@ class DestinationController extends Controller
 
     public function index(Request $request)
     {
-        $query = Destination::approved()->withCount('tourPackages');
+        $query = Destination::approved()
+            ->withCount(['tourPackages' => fn ($tourPackageQuery) => $tourPackageQuery->publiclyListed()]);
 
         if ($search = $request->get('search')) {
             $query->search($search);
@@ -40,7 +41,10 @@ class DestinationController extends Controller
             abort(404);
         }
 
-        $destination->load(['tourPackages.agency', 'memories' => fn($q) => $q->latest()->take(6)]);
+        $destination->load([
+            'tourPackages' => fn ($query) => $query->publiclyListed()->with('agency'),
+            'memories' => fn($q) => $q->latest()->take(6),
+        ]);
         $weather = null;
 
         if ($destination->latitude && $destination->longitude) {

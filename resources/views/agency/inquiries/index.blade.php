@@ -20,9 +20,8 @@
              <select name="status" class="form-input" style="width:auto;flex:1;min-width:150px;" onchange="this.form.submit()">
                 <option value="">All Statuses</option>
                 <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                <option value="contacted" {{ request('status') === 'contacted' ? 'selected' : '' }}>Contacted</option>
-                <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>Confirmed</option>
-                <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                     <option value="accepted" {{ request('status') === 'accepted' ? 'selected' : '' }}>Accepted</option>
+                     <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
             </select>
             <button type="submit" class="btn btn-primary">Search</button>
             @if(request()->hasAny(['status','search']))
@@ -35,22 +34,21 @@
     <div style="display:grid;gap:1rem;">
         @foreach($inquiries as $inquiry)
         <div style="background:white;border-radius:14px;box-shadow:var(--shadow-sm);padding:1.5rem;border-left:4px solid
-            @if($inquiry->status === 'confirmed') var(--forest-green)
-            @elseif($inquiry->status === 'contacted') var(--ocean-blue)
-            @elseif($inquiry->status === 'cancelled') #dc2626
+            @if($inquiry->status === 'accepted') var(--forest-green)
+            @elseif($inquiry->status === 'rejected') #dc2626
             @else var(--sunset-orange) @endif;">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
                 <div style="flex:1;">
                     <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;">
                         <div style="width:40px;height:40px;border-radius:50%;background:var(--forest-green);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;">
-                            {{ strtoupper(substr($inquiry->name, 0, 1)) }}
+                            {{ strtoupper(substr($inquiry->contact_name, 0, 1)) }}
                         </div>
                         <div>
-                            <div style="font-weight:700;color:var(--text-dark);">{{ $inquiry->name }}</div>
-                            <div style="font-size:.85rem;color:var(--text-muted);">{{ $inquiry->email }}</div>
+                            <div style="font-weight:700;color:var(--text-dark);">{{ $inquiry->contact_name }}</div>
+                            <div style="font-size:.85rem;color:var(--text-muted);">{{ $inquiry->contact_email }}</div>
                         </div>
                         @php
-                            $statusColors = ['pending'=>'warning','contacted'=>'info','confirmed'=>'success','cancelled'=>'danger'];
+                            $statusColors = ['pending'=>'warning','accepted'=>'success','rejected'=>'danger'];
                         @endphp
                         <span class="badge badge-{{ $statusColors[$inquiry->status] ?? 'warning' }}">
                             {{ ucfirst($inquiry->status) }}
@@ -60,7 +58,7 @@
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-bottom:.75rem;">
                         <div style="background:var(--platinum-beige);border-radius:8px;padding:.6rem .9rem;">
                             <div style="font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">Package</div>
-                            <div style="font-weight:600;color:var(--text-dark);font-size:.9rem;">{{ $inquiry->tourPackage->name }}</div>
+                            <div style="font-weight:600;color:var(--text-dark);font-size:.9rem;">{{ $inquiry->package->name ?? 'N/A' }}</div>
                         </div>
                         <div style="background:var(--platinum-beige);border-radius:8px;padding:.6rem .9rem;">
                             <div style="font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">Group Size</div>
@@ -81,7 +79,7 @@
 
                 <div style="display:flex;flex-direction:column;gap:.5rem;min-width:140px;">
                     {{-- Reply by email --}}
-                    <a href="mailto:{{ $inquiry->email }}?subject=Re: {{ $inquiry->tourPackage->name }} Inquiry"
+                    <a href="mailto:{{ $inquiry->contact_email }}?subject=Re: {{ $inquiry->package->name ?? 'your inquiry' }} Inquiry"
                        class="btn btn-primary btn-sm" style="text-align:center;">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right:.3rem;"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                         Reply
@@ -92,9 +90,8 @@
                         @csrf @method('PATCH')
                         <select name="status" class="form-input" style="font-size:.8rem;padding:.4rem .6rem;margin-bottom:.4rem;" onchange="this.form.requestSubmit()">
                             <option value="pending" {{ $inquiry->status === 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="contacted" {{ $inquiry->status === 'contacted' ? 'selected' : '' }}>Contacted</option>
-                            <option value="confirmed" {{ $inquiry->status === 'confirmed' ? 'selected' : '' }}>Confirmed</option>
-                            <option value="cancelled" {{ $inquiry->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                            <option value="accepted" {{ $inquiry->status === 'accepted' ? 'selected' : '' }}>Accepted</option>
+                            <option value="rejected" {{ $inquiry->status === 'rejected' ? 'selected' : '' }}>Rejected</option>
                         </select>
                     </form>
                 </div>

@@ -33,6 +33,12 @@ return [
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
+
+        'testing' => [
+            'driver'   => 'sqlite',
+            'database' => env('DB_DATABASE', ':memory:'),
+            'prefix'   => '',
+        ],
     ],
 
     'migrations' => [

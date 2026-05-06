@@ -11,13 +11,13 @@ class HomeController extends Controller
     public function index()
     {
         $featuredDestinations = Destination::approved()
-            ->withCount('tourPackages')
+            ->withCount(['tourPackages' => fn ($query) => $query->publiclyListed()])
             ->latest()
             ->take(6)
             ->get();
 
         $totalDestinations = Destination::approved()->count();
-        $totalPackages = TourPackage::active()->count();
+        $totalPackages = TourPackage::publiclyListed()->count();
 
         return view('home', compact('featuredDestinations', 'totalDestinations', 'totalPackages'));
     }

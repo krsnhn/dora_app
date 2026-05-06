@@ -12,9 +12,10 @@ class FavoriteController extends Controller
     {
         // Get favorites with their destinations
         $favorites = auth()->user()
-            ->favorites() // This uses the relationship you need to add to User model
+            ->favorites()
             ->with(['destination' => function($query) {
-                $query->approved()->withCount('tourPackages');
+                $query->approved()
+                    ->withCount(['tourPackages' => fn ($tourPackageQuery) => $tourPackageQuery->publiclyListed()]);
             }])
             ->paginate(12);
         

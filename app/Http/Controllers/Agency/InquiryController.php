@@ -23,8 +23,8 @@ class InquiryController extends Controller
 
         if ($search = $request->get('search')) {
             $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                                $q->where('contact_name', 'like', "%{$search}%")
+                                    ->orWhere('contact_email', 'like', "%{$search}%");
             });
         }
 
@@ -55,7 +55,7 @@ class InquiryController extends Controller
         if ($inquiry->agency_id !== auth()->id()) abort(403);
 
         $validated = $request->validate([
-            'status' => 'required|in:pending,contacted,confirmed,cancelled',
+            'status' => 'required|in:pending,accepted,rejected',
         ]);
 
         $inquiry->update($validated);

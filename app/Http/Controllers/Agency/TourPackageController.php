@@ -67,12 +67,23 @@ class TourPackageController extends Controller
 
     public function create()
     {
+        // Check if agency is approved
+        if (!auth()->user()->isApprovedAgency()) {
+            return redirect()->route('agency.dashboard')
+                ->with('error', 'Your agency account must be approved to create packages.');
+        }
         $destinations = Destination::approved()->orderBy('name')->get();
         return view('agency.packages.create', compact('destinations'));
     }
 
     public function store(Request $request)
     {
+        // Check if agency is approved
+        if (!auth()->user()->isApprovedAgency()) {
+            return redirect()->route('agency.dashboard')
+                ->with('error', 'Your agency account must be approved to create packages.');
+        }
+
         $validated = $request->validate([
             'name'           => 'required|string|max:255',
             'destination_id' => 'required|exists:destinations,id',

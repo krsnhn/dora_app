@@ -12,10 +12,8 @@ class AgencyMiddleware
         if (!auth()->check() || !auth()->user()->isAgency()) {
             abort(403, 'Access denied. Agency account required.');
         }
-        if (!auth()->user()->isApprovedAgency()) {
-            return redirect()->route('agency.pending')
-                ->with('warning', 'Your agency account is pending approval.');
-        }
+        // Allow unapproved agencies to access dashboard, inquiries, etc.
+        // Package creation restriction is handled separately
         return $next($request);
     }
 }

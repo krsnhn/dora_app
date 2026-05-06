@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\CloudinaryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,9 +11,27 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+    public function __construct(protected CloudinaryService $cloudinary) {}
+
     public function edit(Request $request): View
     {
         return view('profile.edit', ['user' => $request->user()]);
+    }
+
+    public function updatePhoto(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'profile_photo' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+        ]);
+
+        $user = $request->user();
+        $url = $this->cloudinary->upload($request->file('profile_photo'), 'dora/profile-photos');
+
+        if ($url) {
+            $user->update(['profile_photo' => $url]);
+        }
+
+        return redirect()->route('profile.edit')->with('success', 'Profile photo updated.');
     }
 
     public function update(Request $request): RedirectResponse

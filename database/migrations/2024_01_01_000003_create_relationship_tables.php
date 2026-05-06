@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('pax')->default(1);
             $table->text('message')->nullable();
             $table->date('travel_date')->nullable();
-            $table->enum('status', ['pending', 'contacted', 'confirmed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'accepted', 'rejected'])->default('pending');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->foreign('package_id')->references('id')->on('tour_packages')->onDelete('cascade');
             $table->foreign('agency_id')->references('id')->on('users')->onDelete('cascade');

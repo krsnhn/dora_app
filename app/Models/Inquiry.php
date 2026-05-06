@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Inquiry extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id', 'package_id', 'agency_id', 'contact_name', 'contact_email',
         'contact_phone', 'pax', 'message', 'travel_date', 'status',
