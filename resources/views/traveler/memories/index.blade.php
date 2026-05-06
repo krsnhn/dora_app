@@ -233,18 +233,38 @@
         gap: .5rem;
     }
 
-    .album-rename-btn {
-        border: 0;
-        background: transparent;
-        color: var(--text-muted);
-        font-size: .74rem;
-        font-weight: 800;
-        cursor: pointer;
-        padding: .55rem .1rem 0;
+    .album-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
     }
 
-    .album-rename-btn:hover {
+    .album-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+        padding: 0;
+    }
+
+    .album-action-btn:hover {
+        background: rgba(0, 0, 0, 0.05);
         color: var(--forest-green);
+    }
+
+    .album-action-btn.delete {
+        color: #ef4444;
+    }
+
+    .album-action-btn.delete:hover {
+        background: rgba(239, 68, 68, 0.12);
     }
 
     .album-pill {
@@ -661,7 +681,23 @@
                             <div class="album-name">{{ $album->name }}</div>
                             <div class="album-sub">{{ $album->memories_count }} {{ Str::plural('photo', $album->memories_count) }}</div>
                         </div>
-                        <button type="button" class="album-rename-btn" onclick="event.preventDefault(); event.stopPropagation(); openRenameAlbumModal({{ $album->id }}, '{{ addslashes($album->name) }}')">Rename</button>
+                        <div class="album-actions">
+                            <button type="button" class="album-action-btn" onclick="event.preventDefault(); event.stopPropagation(); openEditAlbumModal({{ $album->id }}, '{{ addslashes($album->name) }}')" title="Edit album">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <path d="M12 20h9" />
+                                    <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                                </svg>
+                            </button>
+                            <button type="button" class="album-action-btn delete" onclick="event.preventDefault(); event.stopPropagation(); confirmDeleteAlbum({{ $album->id }}, '{{ addslashes($album->name) }}')" title="Delete album">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <path d="M3 6h18" />
+                                    <path d="M8 6V4h8v2" />
+                                    <path d="M19 6l-1 14H6L5 6" />
+                                    <path d="M10 11v6" />
+                                    <path d="M14 11v6" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </a>
             @endforeach
@@ -775,11 +811,11 @@
 <div id="renameAlbumModal" class="modal-overlay">
     <div class="modal-container">
         <div class="modal-header">
-            <h3 class="modal-title">Rename Album</h3>
-            <button type="button" onclick="closeRenameAlbumModal()" class="modal-close">&times;</button>
+            <h3 class="modal-title">Edit Album</h3>
+            <button type="button" onclick="closeEditAlbumModal()" class="modal-close">&times;</button>
         </div>
 
-        <form method="POST" id="renameAlbumForm" data-confirm="Rename this album?" data-confirm-title="Rename Album" data-confirm-text="Rename">
+        <form method="POST" id="renameAlbumForm" data-confirm="Save album changes?" data-confirm-title="Edit Album" data-confirm-text="Save">
             @csrf
             @method('PATCH')
             <div class="modal-body">
@@ -792,13 +828,18 @@
                 </div>
 
                 <div class="btn-group">
-                    <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center;">Rename</button>
-                    <button type="button" onclick="closeRenameAlbumModal()" class="btn btn-secondary" style="flex:1;justify-content:center;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center;">Save</button>
+                    <button type="button" onclick="closeEditAlbumModal()" class="btn btn-secondary" style="flex:1;justify-content:center;">Cancel</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+
+<form id="deleteAlbumForm" method="POST" style="display:none;">
+    @csrf
+    @method('DELETE')
+</form>
 
 {{-- Upload Modal --}}
 <div id="uploadModal" class="modal-overlay">
@@ -922,7 +963,7 @@ function closeUploadModal() {
     resetUploadForm();
 }
 
-function openRenameAlbumModal(albumId, albumName) {
+function openEditAlbumModal(albumId, albumName) {
     const modal = document.getElementById('renameAlbumModal');
     const form = document.getElementById('renameAlbumForm');
     const input = document.getElementById('renameAlbumInput');
@@ -934,8 +975,18 @@ function openRenameAlbumModal(albumId, albumName) {
     input.select();
 }
 
-function closeRenameAlbumModal() {
+function closeEditAlbumModal() {
     document.getElementById('renameAlbumModal').style.display = 'none';
+}
+
+function confirmDeleteAlbum(albumId, albumName) {
+    const form = document.getElementById('deleteAlbumForm');
+    form.action = `/memories/albums/${albumId}`;
+    form.dataset.confirm = `Delete album "${albumName}"? Any photos in this album will be moved to Recents.`;
+    form.dataset.confirmTitle = 'Delete Album';
+    form.dataset.confirmText = 'Delete';
+    form.dataset.confirmDanger = 'true';
+    form.requestSubmit();
 }
 
 function resetUploadForm() {
@@ -979,7 +1030,7 @@ document.getElementById('uploadModal').addEventListener('click', function(e) {
     if (e.target === this) closeUploadModal();
 });
 document.getElementById('renameAlbumModal').addEventListener('click', function(e) {
-    if (e.target === this) closeRenameAlbumModal();
+    if (e.target === this) closeEditAlbumModal();
 });
 
 // Lightbox functions
@@ -1003,7 +1054,7 @@ function closeLightbox() {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeUploadModal();
-        closeRenameAlbumModal();
+        closeEditAlbumModal();
         closeLightbox();
     }
 });

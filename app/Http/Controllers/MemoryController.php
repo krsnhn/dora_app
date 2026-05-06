@@ -169,6 +169,29 @@ class MemoryController extends Controller
             ->with('success', 'Album renamed.');
     }
 
+    public function destroyAlbum(MemoryAlbum $album)
+    {
+        if ($album->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $defaultAlbum = $this->ensureDefaultAlbum(auth()->id());
+
+        if ($album->id === $defaultAlbum->id) {
+            return redirect()->route('memories.index')
+                ->with('error', 'The default album cannot be deleted.');
+        }
+
+        if ($album->memories()->exists()) {
+            $album->memories()->update(['album_id' => $defaultAlbum->id]);
+        }
+
+        $album->delete();
+
+        return redirect()->route('memories.index')
+            ->with('success', 'Album deleted and memories moved to Recents.');
+    }
+
     public function destroy(Memory $memory)
     {
         if ($memory->user_id !== auth()->id()) {

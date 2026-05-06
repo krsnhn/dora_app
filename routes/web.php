@@ -48,6 +48,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/memories', [MemoryController::class, 'index'])->name('memories.index');
     Route::post('/memories', [MemoryController::class, 'store'])->name('memories.store');
     Route::patch('/memories/albums/{album}', [MemoryController::class, 'updateAlbum'])->name('memories.albums.update');
+    Route::delete('/memories/albums/{album}', [MemoryController::class, 'destroyAlbum'])->name('memories.albums.destroy');
     Route::delete('/memories/{memory}', [MemoryController::class, 'destroy'])->name('memories.destroy');
 
 
