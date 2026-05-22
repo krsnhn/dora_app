@@ -143,6 +143,10 @@
                                         {{ $destination->is_approved ? 'Unapprove' : 'Approve' }}
                                     </button>
                                 </form>
+                                <form method="POST" action="{{ route('admin.destinations.destroy', $destination) }}" data-confirm="Delete this destination? Related tour packages and favorites will also be deleted." data-confirm-title="Delete Destination" data-confirm-text="Delete" data-confirm-danger="true">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:none;cursor:pointer;">Delete</button>
+                                </form>
                             </div>
                         </td>
                     </tr>

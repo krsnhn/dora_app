@@ -114,6 +114,13 @@ public function update(Request $request, Destination $destination)
         return back()->with('success', "Destination {$status}.");
     }
 
+    public function destroy(Destination $destination)
+    {
+        $destination->delete();
+
+        return redirect()->route('admin.destinations.index')->with('success', 'Destination deleted.');
+    }
+
     public function reviewRequest(Request $request, DestinationRequest $destinationRequest)
     {
         $validated = $request->validate([
@@ -140,7 +147,7 @@ public function update(Request $request, Destination $destination)
 
         $destinationRequest->update([
             'status' => $validated['action'] === 'approve' ? 'approved' : 'rejected',
-            'admin_notes' => $validated['notes'],
+            'admin_notes' => $validated['notes'] ?? null,
         ]);
 
         return back()->with('success', 'Destination request reviewed.');

@@ -104,7 +104,12 @@
         .app-main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
         .app-topbar{height:64px;position:sticky;top:0;z-index:50;background:rgba(247,247,244,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem}
         body[data-theme="dark"] .app-topbar{background:rgba(15,19,22,.9)}
-        .topbar-title{font-weight:800}.topbar-actions{display:flex;align-items:center;gap:.65rem}
+        .topbar-title{font-weight:800}.topbar-actions{display:flex;align-items:center;gap:.65rem;flex:1;justify-content:flex-end}
+        .global-search{flex:1;max-width:520px;min-width:220px;display:flex;align-items:center;gap:.35rem;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:.25rem .35rem .25rem .7rem;box-shadow:var(--shadow-sm)}
+        .global-search svg{width:17px;height:17px;color:var(--text-muted);flex-shrink:0}
+        .global-search input{width:100%;border:0;background:transparent;color:var(--text-dark);font:inherit;font-size:.9rem;outline:0;min-width:0}
+        .global-search button{border:0;background:var(--primary);color:white;border-radius:7px;padding:.42rem .7rem;font:inherit;font-size:.78rem;font-weight:800;cursor:pointer}
+        .global-search button:hover{background:var(--primary-light)}
         .app-content{flex:1;min-width:0}
         body.sidebar-collapsed .app-shell{grid-template-columns:86px minmax(0,1fr)}
         body.sidebar-collapsed .sidebar-link span{display:none}
@@ -144,7 +149,7 @@
 
         footer{background:var(--surface);border-top:1px solid var(--line);padding:3rem 1rem 1.5rem;margin-top:auto}.footer-inner{max-width:1280px;margin:0 auto}.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2rem;margin-bottom:2rem}.footer-title{font-weight:800;font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;color:var(--text-muted);margin-bottom:.9rem}.footer-links{list-style:none;display:grid;gap:.55rem}.footer-links a{text-decoration:none;color:var(--text-muted);font-size:.9rem}.footer-bottom{border-top:1px solid var(--line);padding-top:1rem;display:flex;justify-content:space-between;gap:1rem;color:var(--text-muted);font-size:.82rem}
 
-        @media(max-width:768px){.app-shell{grid-template-columns:86px minmax(0,1fr)}body:not(.sidebar-collapsed) .app-shell{grid-template-columns:min(280px,78vw) minmax(0,1fr)}body:not(.sidebar-collapsed) .app-sidebar{width:min(280px,78vw)}body.sidebar-collapsed .app-sidebar{width:86px}.grid-4{grid-template-columns:1fr}.navbar-nav{display:none;position:fixed;left:0;right:0;top:68px;background:var(--surface);border-bottom:1px solid var(--line);padding:1rem;flex-direction:column;align-items:stretch;z-index:70}.navbar-nav.open{display:flex}.nav-toggle{display:block}.nav-dropdown-menu{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none}.footer-grid{grid-template-columns:1fr 1fr}.page-header h1,.page-title{font-size:2rem}.app-topbar{padding:0 1rem}.footer-bottom{flex-direction:column}}
+        @media(max-width:768px){.app-shell{grid-template-columns:86px minmax(0,1fr)}body:not(.sidebar-collapsed) .app-shell{grid-template-columns:min(280px,78vw) minmax(0,1fr)}body:not(.sidebar-collapsed) .app-sidebar{width:min(280px,78vw)}body.sidebar-collapsed .app-sidebar{width:86px}.grid-4{grid-template-columns:1fr}.navbar-nav{display:none;position:fixed;left:0;right:0;top:68px;background:var(--surface);border-bottom:1px solid var(--line);padding:1rem;flex-direction:column;align-items:stretch;z-index:70}.navbar-nav.open{display:flex}.nav-toggle{display:block}.nav-dropdown-menu{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none}.footer-grid{grid-template-columns:1fr 1fr}.page-header h1,.page-title{font-size:2rem}.app-topbar{height:auto;min-height:64px;padding:.75rem 1rem;align-items:stretch;flex-direction:column;gap:.75rem}.global-search{width:100%;max-width:none}.topbar-actions{width:100%;justify-content:space-between}.footer-bottom{flex-direction:column}}
         @media(max-width:520px){.footer-grid{grid-template-columns:1fr}.container{padding:0 1rem}.app-shell{grid-template-columns:74px minmax(0,1fr)}body:not(.sidebar-collapsed) .app-shell{grid-template-columns:min(248px,76vw) minmax(0,1fr)}body:not(.sidebar-collapsed) .app-sidebar{width:min(248px,76vw)}body.sidebar-collapsed .app-sidebar{width:74px}body.sidebar-collapsed .sidebar-link{justify-content:center;padding:.72rem}body:not(.sidebar-collapsed) .sidebar-link{justify-content:flex-start}}
     </style>
     @stack('styles')
@@ -281,6 +286,13 @@
                     </a>
                 </div>
                 <div class="topbar-actions">
+                    @if($user->isAdmin() || $user->isTraveler())
+                        <form method="GET" action="{{ route('global.search') }}" class="global-search" role="search">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"/></svg>
+                            <input type="search" name="q" value="{{ request('q') }}" placeholder="Search packages, destinations, agencies" aria-label="Global search">
+                            <button type="submit">Search</button>
+                        </form>
+                    @endif
                     <a href="{{ route('destinations.index') }}" class="btn btn-outline btn-sm">Browse</a>
                     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">☾</button>
                 </div>

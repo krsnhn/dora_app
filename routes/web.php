@@ -9,6 +9,7 @@ use App\Http\Controllers\MemoryController;
 use App\Http\Controllers\BackpackController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\AgencyDirectoryController;
 use App\Http\Controllers\Agency\AgencyDashboardController;
 use App\Http\Controllers\Agency\TourPackageController;
@@ -36,6 +37,7 @@ require __DIR__.'/auth.php';
 // Traveler routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', TravelerDashboardController::class)->name('traveler.dashboard');
+    Route::get('/search', GlobalSearchController::class)->name('global.search');
     Route::get('/agencies', [AgencyDirectoryController::class, 'index'])->name('agencies.index');
     Route::get('/agencies/{user}', [AgencyDirectoryController::class, 'show'])->name('agencies.show');
 
@@ -109,6 +111,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/destinations', [AdminDestinationController::class, 'store'])->name('destinations.store');
     Route::get('/destinations/{destination}/edit', [AdminDestinationController::class, 'edit'])->name('destinations.edit');
     Route::put('/destinations/{destination}', [AdminDestinationController::class, 'update'])->name('destinations.update');
+    Route::delete('/destinations/{destination}', [AdminDestinationController::class, 'destroy'])->name('destinations.destroy');
     Route::patch('/destinations/{destination}/toggle', [AdminDestinationController::class, 'toggleApproval'])->name('destinations.toggle');
     Route::post('/destination-requests/{destinationRequest}/review', [AdminDestinationController::class, 'reviewRequest'])->name('destination-requests.review');
 
